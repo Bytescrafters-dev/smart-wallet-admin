@@ -1,40 +1,59 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { getAccessTokenFromCookies } from "./cookies";
 
-const BASE = process.env.BACKEND_URL!;
-const JWT_COOKIE = process.env.JWT_COOKIE_NAME || "platform_jwt";
+const BACKEND_URL = process.env.BACKEND_URL!;
 
-type Upstream = (
-  req: NextRequest
-) => Promise<{ path: string; init?: RequestInit }>;
+export async function proxyToBackend(
+  req: Request,
+  backendPath: string
+): Promise<Response> {
+  const url = new URL(req.url);
+  const target = `${BACKEND_URL}/${backendPath}${url.search}`;
 
-export const withAuthProxy = (upstream: Upstream) => {
-  return async (req: NextRequest) => {
-    console.log(JWT_COOKIE);
+  const headers = new Headers(req.headers);
+  headers.set("host", new URL(BACKEND_URL).host); // avoid host issues
+  headers.delete("cookie"); // don’t forward browser cookies to backend
 
-    const token = req.cookies.get(JWT_COOKIE)?.value;
+  const accessToken = await getAccessTokenFromCookies();
 
-    console.log("from proxy", token);
-    if (!token)
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  console.log("new access", accessToken);
+  if (accessToken) headers.set("authorization", `Bearer ${accessToken}`);
 
-    const { path, init } = await upstream(req);
-    const headers = new Headers(init?.headers || {});
-    headers.set("Authorization", `Bearer ${token}`);
-    if (!headers.has("content-type") && init?.body)
-      headers.set("content-type", "application/json");
-
-    console.log(`${BASE}${path}`);
-
-    const res = await fetch(`${BASE}${path}`, {
-      ...init,
-      headers,
-      cache: "no-store",
-    });
-
-    return new NextResponse(res.body, {
-      status: res.status,
-      headers: res.headers,
-    });
+  const init: RequestInit = {
+    method: req.method,
+    headers,
+    body:
+      req.method !== "GET" && req.method !== "HEAD"
+        ? await req.clone().arrayBuffer()
+        : undefined,
+    redirect: "manual",
   };
-};
+
+  const res = await fetch(target, init);
+  return res;
+}
+
+export async function proxyToBackendWithAccess(
+  req: Request,
+  backendPath: string,
+  token: string
+): Promise<Response> {
+  const url = new URL(req.url);
+  const target = `${BACKEND_URL}/${backendPath}${url.search}`;
+
+  const headers = new Headers(req.headers);
+  headers.set("authorization", `Bearer ${token}`);
+  headers.delete("cookie"); // don’t forward browser cookies to backend
+
+  const init: RequestInit = {
+    method: req.method,
+    headers,
+    body:
+      req.method !== "GET" && req.method !== "HEAD"
+        ? await req.clone().arrayBuffer()
+        : undefined,
+    redirect: "manual",
+  };
+
+  const res = await fetch(target, init);
+  return res;
+}

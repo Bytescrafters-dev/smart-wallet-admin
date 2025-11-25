@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { setAuthCookies } from "@/lib/cookies";
 
 const BACKEND_URL = process.env.BACKEND_URL;
-const JWT_COOKIE = process.env.JWT_COOKIE_NAME || "platform_jwt";
 
 export const POST = async (req: Request) => {
+  console.log("called login api");
   const body = await req.json();
 
   try {
-    const res = await fetch(`${BACKEND_URL}/platform/auth/login`, {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
+
+    console.log(res);
+
     if (!res.ok) {
       return NextResponse.json(
         { message: "Invalid credentials" },
@@ -21,31 +24,18 @@ export const POST = async (req: Request) => {
     }
 
     const data = await res.json();
-    const token = data?.accessToken;
-    if (!token) {
+    const access = data?.access;
+    const refresh = data?.refresh;
+    if (!(access && refresh)) {
       return NextResponse.json(
         { message: "Invalid login response" },
         { status: 500 }
       );
     }
 
-    const response = NextResponse.json({ ok: true });
+    await setAuthCookies(access, 15 * 60, refresh, 60 * 60 * 24 * 30);
 
-    console.log("platform token", token);
-
-    //const cookieStore = await cookies();
-
-    response.cookies.set({
-      name: JWT_COOKIE,
-      value: token,
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60,
-    });
-
-    return response;
+    return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ message: "Login error" }, { status: 500 });
   }

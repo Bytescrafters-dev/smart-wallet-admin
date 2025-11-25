@@ -20,8 +20,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { User } from "@/types/common";
-import { useUser } from "@/contexts/permissionsProvider";
 
 const navMain = [
   {
@@ -72,8 +70,6 @@ const navMain = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user: User = useUser();
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -84,7 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <span className="text-xl font-semibold">SmartX Solutions</span>
+                <span className="text-xl font-semibold">Smart Wallets</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -93,7 +89,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={navMain} />
       </SidebarContent>
-      <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
+      <SidebarFooter>
+        <NavUser
+          user={{
+            name: "Ravindu Landekumbura",
+            email: "Ravindulandekumbura14@gmail",
+            id: "as141asdfsdf548",
+            status: "Active",
+          }}
+        />
+      </SidebarFooter>
     </Sidebar>
   );
 }

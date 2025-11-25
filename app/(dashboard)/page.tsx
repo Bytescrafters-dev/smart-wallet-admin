@@ -1,13 +1,10 @@
 "use client";
-import { getPermissions } from "@/contexts/permissionsProvider";
 import { SectionCards } from "@/components/section-cards";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import data from "./data.json";
 
 const Dashboard = () => {
-  const perms = getPermissions();
-  console.log(perms);
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">

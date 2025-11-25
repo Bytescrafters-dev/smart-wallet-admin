@@ -4,3 +4,24 @@ export type User = {
   email: string;
   status: string;
 };
+
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export enum UserRole {
+  ADMIN = "ADMIN",
+  USER = "USER",
+}
+
+export type UserProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  status: UserStatus;
+  email: string;
+  phone: string;
+  avatar: string;
+  role: UserRole;
+};

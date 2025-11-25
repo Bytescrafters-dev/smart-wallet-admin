@@ -28,6 +28,7 @@ import {
 import { User } from "@/types/common";
 import { useLogin } from "@/hooks/auth/useLogin";
 import { useRouter } from "next/navigation";
+import { MY_PROFILE } from "@/shared/constants/pageUrls";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -89,7 +90,7 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <IconUserCircle />
-                Account
+                <a href={MY_PROFILE}>Account</a>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconSettings />
