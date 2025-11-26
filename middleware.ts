@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
 
-const JWT_COOKIE = process.env.JWT_COOKIE_NAME || "platform_jwt";
-const PROTECTED = ["/", "/products"];
+const JWT_COOKIE = env.JWT_COOKIE_NAME;
+const PROTECTED = ["/", "/products", "/admins", "my-profile"];
 
 export const middleware = (req: NextRequest) => {
   const path = req.nextUrl.pathname;

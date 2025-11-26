@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { setAuthCookies } from "@/lib/cookies";
-
-const BACKEND_URL = process.env.BACKEND_URL;
+import { env } from "@/lib/env";
 
 export const POST = async (req: Request) => {
   console.log("called login api");
   const body = await req.json();
 
   try {
-    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+    const res = await fetch(`${env.BACKEND_URL}/auth/login`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),

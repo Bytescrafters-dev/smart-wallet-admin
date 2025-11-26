@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { useProfile } from "@/hooks/my-profile/useProfile";
 
 async function getCroppedImg(
   imageSrc: string,
@@ -65,10 +64,21 @@ type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onUploaded: () => void;
+  uploadAvatar: (
+    formData: FormData
+  ) => Promise<{ success: true; avatar: string } | undefined>;
+  loadingAvatar: boolean;
+  error: string | null;
 };
 
-export function AvatarUploader({ open, onOpenChange, onUploaded }: Props) {
-  const { uploadAvatar, loadingAvatar, error } = useProfile();
+export function AvatarUploader({
+  open,
+  onOpenChange,
+  onUploaded,
+  uploadAvatar,
+  loadingAvatar,
+  error,
+}: Props) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -93,12 +103,16 @@ export function AvatarUploader({ open, onOpenChange, onUploaded }: Props) {
     const formData = new FormData();
     formData.append("avatar", croppedBlob, "avatar.jpg");
 
-    const res = await uploadAvatar(formData);
-
-    if (res?.success) {
-      onUploaded();
+    try {
+      const res = await uploadAvatar(formData);
+      if (res?.success) {
+        onUploaded();
+      }
+    } catch {
+      toast.error("Failed to upload avatar!");
+    } finally {
+      onOpenChange(false);
     }
-    onOpenChange(false);
   }
 
   useEffect(() => {

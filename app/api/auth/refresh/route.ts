@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRefreshTokenFromCookies, setAuthCookies } from "@/lib/cookies";
-
-const BACKEND_URL = process.env.BACKEND_URL!;
+import { env } from "@/lib/env";
 
 export const POST = async () => {
   console.log("called refresh token api");
@@ -10,7 +9,7 @@ export const POST = async () => {
   if (!refresh)
     return NextResponse.json({ message: "No refresh token" }, { status: 401 });
 
-  const res = await fetch(`${BACKEND_URL}/auth/refresh`, {
+  const res = await fetch(`${env.BACKEND_URL}/auth/refresh`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ refresh }),

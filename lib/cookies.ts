@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
+import { env } from "./env";
 
 const isProd = process.env.NODE_ENV === "production";
-export const JWT_COOKIE = process.env.JWT_COOKIE_NAME || "platform_jwt";
-export const REFRESH_COOKIE =
-  process.env.REFRESH_COOKIE_NAME || "platform_refresh";
-const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+export const JWT_COOKIE = env.JWT_COOKIE_NAME;
+export const REFRESH_COOKIE = env.REFRESH_COOKIE_NAME;
+const cookieDomain = env.COOKIE_DOMAIN || undefined;
 
 export const setAuthCookies = async (
   accessToken: string,

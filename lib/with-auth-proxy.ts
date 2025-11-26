@@ -1,16 +1,15 @@
 import { getAccessTokenFromCookies } from "./cookies";
-
-const BACKEND_URL = process.env.BACKEND_URL!;
+import { env } from "./env";
 
 export async function proxyToBackend(
   req: Request,
   backendPath: string
 ): Promise<Response> {
   const url = new URL(req.url);
-  const target = `${BACKEND_URL}/${backendPath}${url.search}`;
+  const target = `${env.BACKEND_URL}/${backendPath}${url.search}`;
 
   const headers = new Headers(req.headers);
-  headers.set("host", new URL(BACKEND_URL).host); // avoid host issues
+  headers.set("host", new URL(env.BACKEND_URL).host); // avoid host issues
   headers.delete("cookie"); // don’t forward browser cookies to backend
 
   const accessToken = await getAccessTokenFromCookies();
@@ -38,7 +37,7 @@ export async function proxyToBackendWithAccess(
   token: string
 ): Promise<Response> {
   const url = new URL(req.url);
-  const target = `${BACKEND_URL}/${backendPath}${url.search}`;
+  const target = `${env.BACKEND_URL}/${backendPath}${url.search}`;
 
   const headers = new Headers(req.headers);
   headers.set("authorization", `Bearer ${token}`);

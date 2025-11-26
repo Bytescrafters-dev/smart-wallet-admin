@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserProfile, UserStatus } from "@/types/common";
+import { UserStatus } from "@/types/common";
 import { Loader2Icon, Pencil } from "lucide-react";
 import { useProfile } from "@/hooks/my-profile/useProfile";
 import { z } from "zod";
@@ -54,40 +54,60 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 const MyProfile = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [openAvatarDialog, setOpenAvatarDialog] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(false);
-  const { fetchProfile, uploadProfile, loading, error, user } = useProfile();
+  const {
+    profile,
+    profileLoading,
+    profileError,
+    refetchProfile,
+    uploadProfile,
+    updatingProfile,
+    uploadProfileError,
+    uploadAvatar,
+    uploadingAvatar,
+    uploadAvatarError,
+  } = useProfile();
   const { register, handleSubmit, reset } = useForm<Form>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      phone: "",
+    },
   });
 
   useEffect(() => {
-    getUserDetails();
-  }, []);
-
-  useEffect(() => {
-    if (user) setProfile(user);
-  }, [user]);
-
-  const getUserDetails = async () => {
-    await fetchProfile();
-  };
+    if (profile) {
+      reset({
+        firstName: profile.firstName ?? "",
+        lastName: profile.lastName ?? "",
+        phone: profile.phone ?? "",
+      });
+    }
+  }, [profile, reset]);
 
   const onSubmit = async (values: Form) => {
     const { firstName, lastName, phone } = values;
-    await uploadProfile({ firstName, lastName, phone });
-    console.log(values);
-    reset();
-    setEdit(false);
+    try {
+      await uploadProfile({ firstName, lastName, phone });
+      toast.success("Profile updated successfully!");
+      setEdit(false);
+    } catch {
+      toast.error("Failed to update profile!");
+    }
   };
 
   useEffect(() => {
-    if (error) toast.error(error);
-  }, [error]);
+    if (profileError) toast.error(profileError);
+  }, [profileError]);
+
+  useEffect(() => {
+    if (uploadProfileError) toast.error(uploadProfileError);
+  }, [uploadProfileError]);
 
   const onUploaded = async () => {
-    await fetchProfile();
+    await refetchProfile();
     toast.success("Profile avatar updated!");
   };
 
@@ -99,7 +119,7 @@ const MyProfile = () => {
 
       <Card className="overflow-hidden">
         <CardHeader className="flex flex-row items-center gap-4">
-          {loading ? (
+          {profileLoading && !profile ? (
             <Skeleton className="h-20 w-full rounded-xl" />
           ) : (
             <>
@@ -133,6 +153,9 @@ const MyProfile = () => {
                   open={openAvatarDialog}
                   onOpenChange={setOpenAvatarDialog}
                   onUploaded={onUploaded}
+                  uploadAvatar={uploadAvatar}
+                  loadingAvatar={uploadingAvatar}
+                  error={uploadAvatarError}
                 />
               </div>
               <div className="grid flex-1 text-left leading-tight">
@@ -154,7 +177,7 @@ const MyProfile = () => {
         <Separator />
 
         <CardContent className="grid gap-6 p-6">
-          {loading ? (
+          {profileLoading && !profile ? (
             <Skeleton className="h-48 w-full rounded-xl" />
           ) : edit ? (
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -170,7 +193,6 @@ const MyProfile = () => {
                     id="firstName"
                     type="text"
                     placeholder="firstName"
-                    defaultValue={profile?.firstName}
                     {...register("firstName")}
                   />
                 </div>
@@ -185,7 +207,6 @@ const MyProfile = () => {
                     id="lastName"
                     type="text"
                     placeholder="lastName"
-                    defaultValue={profile?.lastName}
                     {...register("lastName")}
                   />
                 </div>
@@ -206,7 +227,6 @@ const MyProfile = () => {
                     id="phone"
                     type="text"
                     placeholder="phone"
-                    defaultValue={profile?.phone}
                     {...register("phone")}
                   />
                 </div>
@@ -225,8 +245,8 @@ const MyProfile = () => {
               </div>
 
               <div className="flex gap-2 mt-4">
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
+                <Button type="submit" disabled={updatingProfile}>
+                  {updatingProfile ? (
                     <>
                       <Loader2Icon className="animate-spin" />
                       Please wait
