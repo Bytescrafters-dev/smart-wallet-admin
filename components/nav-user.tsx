@@ -1,15 +1,17 @@
 "use client";
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
   IconNotification,
-  IconUserCircle,
   IconSettings,
+  IconUserCircle,
 } from "@tabler/icons-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,21 +21,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { User } from "@/types/common";
 import { useLogin } from "@/hooks/auth/useLogin";
-import { useRouter } from "next/navigation";
+import { useProfile } from "@/hooks/my-profile/useProfile";
 import { MY_PROFILE } from "@/shared/constants/pageUrls";
+import { useRouter } from "next/navigation";
 
-export function NavUser({ user }: { user: User }) {
+const getDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  email?: string | null
+) => {
+  const composed = `${firstName ?? ""} ${lastName ?? ""}`.trim();
+  return composed || email || "Unknown user";
+};
+
+const getInitials = (name: string) => {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("")
+    .slice(0, 2);
+  return initials || "NA";
+};
+
+export function NavUser() {
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const { logout, loading } = useLogin();
+  const { logout, loading: logoutPending } = useLogin();
+  const {
+    profile,
+    profileLoading,
+    profileError,
+    refetchProfile,
+  } = useProfile();
+
+  useEffect(() => {
+    if (profileError) toast.error(profileError);
+  }, [profileError]);
 
   const onClickLogout = async () => {
     const success = await logout();
@@ -43,6 +75,46 @@ export function NavUser({ user }: { user: User }) {
       router.refresh();
     }
   };
+
+  if (profileLoading && !profile) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <div className="grid flex-1 gap-1">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
+  if (profileError && !profile) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex flex-col gap-2 rounded-md border border-dashed border-muted-foreground/30 p-3 text-sm text-muted-foreground">
+            <span>Failed to load profile</span>
+            <Button variant="outline" size="sm" onClick={() => refetchProfile()}>
+              Retry
+            </Button>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
+  const displayName = getDisplayName(
+    profile?.firstName,
+    profile?.lastName,
+    profile?.email
+  );
+  const email = profile?.email ?? "—";
+  const avatarSrc = profile?.avatar || "/avatars/shadcn.jpg";
+  const initials = getInitials(displayName);
 
   return (
     <SidebarMenu>
@@ -54,13 +126,15 @@ export function NavUser({ user }: { user: User }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src="/avatars/shadcn.jpg" alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={avatarSrc} alt={displayName} />
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {email}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -75,36 +149,40 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src="/avatars/shadcn.jpg" alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={avatarSrc} alt={displayName} />
+                  <AvatarFallback className="rounded-lg">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {email}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                <a href={MY_PROFILE}>Account</a>
+              <DropdownMenuItem asChild>
+                <a href={MY_PROFILE} className="flex items-center gap-2">
+                  <IconUserCircle />
+                  Account
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <IconSettings />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <IconNotification />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onClickLogout}>
+            <DropdownMenuItem onClick={onClickLogout} disabled={logoutPending}>
               <IconLogout />
-              Log out
+              {logoutPending ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

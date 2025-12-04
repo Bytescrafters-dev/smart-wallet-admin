@@ -7,6 +7,7 @@ import {
   IconFolder,
   IconListDetails,
   IconUsers,
+  IconBallVolleyball,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -30,13 +31,23 @@ const navMain = [
     items: [],
   },
   {
-    title: "User Roles",
-    url: "#",
+    title: "Product Categories",
+    url: "/product-categories",
     icon: IconListDetails,
     collapsible: true,
     items: [
-      { title: "Add User Role", url: "/user-roles/add" },
-      { title: "View User Role", url: "/user-roles" },
+      { title: "View Product Categories", url: "/product-categories" },
+      { title: "Add Product Category", url: "/product-categories/create" },
+    ],
+  },
+  {
+    title: "Products",
+    url: "/products",
+    icon: IconBallVolleyball,
+    collapsible: true,
+    items: [
+      { title: "View Products", url: "/products" },
+      { title: "Add Product", url: "/products/create" },
     ],
   },
   {
@@ -90,14 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: "Ravindu Landekumbura",
-            email: "Ravindulandekumbura14@gmail",
-            id: "as141asdfsdf548",
-            status: "Active",
-          }}
-        />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );
