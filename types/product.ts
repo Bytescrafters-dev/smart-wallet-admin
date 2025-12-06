@@ -6,6 +6,7 @@ export interface Product {
   profileId: string;
   active: boolean;
   createdAt: string;
+  description: string;
   updatedAt: string;
   storeId: string;
 }

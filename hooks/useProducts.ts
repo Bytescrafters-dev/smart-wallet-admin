@@ -82,6 +82,29 @@ export const useProducts = ({
   });
 };
 
+export const useGetProduct = (productId: string, options?: { enabled?: boolean }) => {
+  const currentStore = useCurrentStore();
+
+  return useQuery({
+    queryKey: ["product", productId],
+    queryFn: async (): Promise<Product> => {
+      if (!productId) {
+        throw new Error("Product ID is required");
+      }
+
+      const response = await fetch(`/api/proxy/products/${productId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch product");
+      }
+
+      return response.json();
+    },
+    enabled: !!productId && (options?.enabled !== false),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
   const currentStore = useCurrentStore();
