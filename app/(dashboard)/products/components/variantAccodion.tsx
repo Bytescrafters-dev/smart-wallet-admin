@@ -115,15 +115,22 @@ const VariantAccordionItem = ({
       className="border rounded-lg mb-2"
     >
       <AccordionTrigger className="px-4 py-3 hover:no-underline">
-        <div className="flex items-center justify-between w-full mr-4">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-wrap gap-1">
-              {editedVariant.optionValueNames?.map((name, i) => (
-                <Badge key={i} variant="outline" className="text-xs">
-                  {name}
-                </Badge>
-              ))}
-            </div>
+        <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-4 items-center w-full mr-4 text-sm">
+          <span className="font-mono font-semibold text-gray-900">
+            {editedVariant.title}
+          </span>
+          <span className="text-gray-600">
+            {primaryPrice?.currency}{" "}
+            {((primaryPrice?.amount || 0) / 100).toFixed(2)}
+          </span>
+          <span
+            className={
+              hasLowStock ? "text-red-600 font-medium" : "text-gray-600"
+            }
+          >
+            Stock: {totalStock}
+          </span>
+          <div className="flex items-center gap-2">
             <Badge
               variant={editedVariant.active ? "default" : "secondary"}
               className="text-xs"
@@ -138,18 +145,9 @@ const VariantAccordionItem = ({
                 Not Saved
               </Badge>
             )}
-          </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <span className="font-mono">{editedVariant.sku}</span>
-            <span>
-              {primaryPrice?.currency} {(primaryPrice?.amount || 0) / 100}
-            </span>
-            <span className={hasLowStock ? "text-red-600 font-medium" : ""}>
-              Stock: {totalStock}
-            </span>
             {hasChanges && (
               <Badge variant="destructive" className="text-xs">
-                Unsaved Changes
+                Unsaved
               </Badge>
             )}
           </div>
@@ -161,10 +159,12 @@ const VariantAccordionItem = ({
             {[
               { value: "basic", Label: "Basic Info" },
               { value: "pricing", Label: "Pricing" },
-              { value: "physical", Label: "Inventory" },
-              { value: "inventory", Label: "Dimensions" },
+              { value: "physical", Label: "Dimensions" },
+              { value: "inventory", Label: "Inventory" },
             ].map((item) => (
-              <TabsTrigger value={item.value}>{item.Label}</TabsTrigger>
+              <TabsTrigger key={item.value} value={item.value}>
+                {item.Label}
+              </TabsTrigger>
             ))}
           </TabsList>
 
@@ -199,7 +199,7 @@ const VariantAccordionItem = ({
                     updateVariant("active", value === "true")
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -372,15 +372,15 @@ const VariantAccordionItem = ({
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-between items-center pt-4 border-t mt-4">
-          <Button
+        <div className="flex justify-end items-center pt-4 border-t mt-4">
+          {/* <Button
             variant="destructive"
             size="sm"
             onClick={() => onDelete(variant.id || "", index)}
           >
             <Trash2 className="w-4 h-4 mr-2" />
             {isUnsaved ? "Remove" : "Delete"}
-          </Button>
+          </Button> */}
           <div className="flex gap-2">
             {hasChanges && (
               <Button variant="outline" size="sm" onClick={handleReset}>
