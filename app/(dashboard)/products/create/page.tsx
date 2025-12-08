@@ -12,8 +12,7 @@ import ProductBasicForm from "./components/baseProduct";
 import ProductImages from "./components/productImages";
 import ProductOptions from "./components/productOptions";
 import ProductVariants from "./components/productVariants";
-import ProductReview from "./components/variantPricing";
-import VariantPricing from "./components/variantPricing";
+import ProductReview from "./components/ProductReview";
 import StepIndicator from "@/components/multi-step-component";
 
 const CreateProduct = () => {
@@ -72,7 +71,7 @@ const CreateProduct = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -110,12 +109,10 @@ const CreateProduct = () => {
       case 1:
         return <ProductOptions productId={productId ?? ""} />;
       case 2:
-        return <ProductVariants />;
+        return <ProductVariants productId={productId ?? ""} />;
       case 3:
-        return <VariantPricing />;
-      case 4:
         return <ProductImages />;
-      case 5:
+      case 4:
         return <ProductReview />;
       default:
         return null;
@@ -164,7 +161,7 @@ const CreateProduct = () => {
           >
             Save Draft
           </Button>
-          {currentStep === 5 ? (
+          {currentStep === 4 ? (
             <Button onClick={handleFinish}>Finish</Button>
           ) : (
             <Button onClick={handleNext}>
@@ -193,8 +190,7 @@ const CreateProduct = () => {
         steps={[
           "Basic Info",
           "Options",
-          "Variants",
-          "Pricing",
+          "Variants & Pricing",
           "Images",
           "Review",
         ]}
