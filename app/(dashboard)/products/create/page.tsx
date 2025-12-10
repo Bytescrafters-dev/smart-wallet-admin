@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductBasicForm from "./components/baseProduct";
-import ProductImages from "./components/productImages";
-import ProductOptions from "./components/productOptions";
-import ProductVariants from "./components/productVariants";
-import ProductReview from "./components/ProductReview";
+import ProductBasicForm from "../components/BaseProduct";
+import ProductImages from "../components/ProductImages";
+import ProductOptions from "../components/ProductOptions";
+import ProductVariants from "../components/ProductVariants";
+import ProductReview from "../components/ProductReview";
 import StepIndicator from "@/components/multi-step-component";
 
 const CreateProduct = () => {
@@ -113,7 +113,7 @@ const CreateProduct = () => {
       case 3:
         return <ProductImages productId={productId ?? undefined} />;
       case 4:
-        return <ProductReview />;
+        return <ProductReview productId={productId ?? ""} />;
       default:
         return null;
     }

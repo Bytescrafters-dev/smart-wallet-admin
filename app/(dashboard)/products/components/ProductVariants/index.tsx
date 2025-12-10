@@ -15,9 +15,9 @@ import {
   useGetProductOptions,
   ProductOptionValue,
 } from "@/hooks/useProductOptions";
-import VariantAccordionItem from "../../components/variantAccodion";
+import VariantAccordionItem from "../variantAccodion";
 import { VariantMasterTemplate } from "@/types/product";
-import VariantMasterTemplateCard from "../../components/variantMasterTemplate";
+import VariantMasterTemplateCard from "../variantMasterTemplate";
 
 interface ProductVariantsProps {
   productId?: string;

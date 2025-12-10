@@ -1,16 +1,31 @@
-import { VariantInventory, VariantPrice } from "@/hooks/useProductVariants";
+import { VariantInventory, VariantPrice, ProductVariant } from "@/hooks/useProductVariants";
+import { ProductOption } from "@/hooks/useProductOptions";
+import { ProductImage } from "@/types/productImage";
 
 export interface Product {
   id: string;
   title: string;
   slug: string;
+  description: string;
   categoryId: string;
   profileId: string;
   active: boolean;
-  createdAt: string;
-  description: string;
-  updatedAt: string;
   storeId: string;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Nested relationships from API response
+  category?: {
+    id: string;
+    name: string;
+  };
+  profile?: {
+    id: string;
+    name: string;
+  };
+  images?: ProductImage[];
+  options?: ProductOption[];
+  variants?: ProductVariant[];
 }
 
 export interface VariantMasterTemplate {

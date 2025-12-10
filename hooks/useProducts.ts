@@ -82,9 +82,10 @@ export const useProducts = ({
   });
 };
 
-export const useGetProduct = (productId: string, options?: { enabled?: boolean }) => {
-  const currentStore = useCurrentStore();
-
+export const useGetProduct = (
+  productId: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ["product", productId],
     queryFn: async (): Promise<Product> => {
@@ -100,7 +101,7 @@ export const useGetProduct = (productId: string, options?: { enabled?: boolean }
 
       return response.json();
     },
-    enabled: !!productId && (options?.enabled !== false),
+    enabled: !!productId && options?.enabled !== false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

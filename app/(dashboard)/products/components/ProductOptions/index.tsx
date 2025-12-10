@@ -11,7 +11,6 @@ import {
   useGetProductOptions,
   useCreateProductOption,
   useDeleteProductOption,
-  ProductOption,
 } from "@/hooks/useProductOptions";
 
 interface ProductOptionsProps {
