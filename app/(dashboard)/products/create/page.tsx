@@ -111,7 +111,7 @@ const CreateProduct = () => {
       case 2:
         return <ProductVariants productId={productId ?? ""} />;
       case 3:
-        return <ProductImages />;
+        return <ProductImages productId={productId ?? undefined} />;
       case 4:
         return <ProductReview />;
       default:
