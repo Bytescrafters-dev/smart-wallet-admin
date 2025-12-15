@@ -1,4 +1,8 @@
-import { VariantInventory, VariantPrice, ProductVariant } from "@/hooks/useProductVariants";
+import {
+  VariantInventory,
+  VariantPrice,
+  ProductVariant,
+} from "@/hooks/useProductVariants";
 import { ProductOption } from "@/hooks/useProductOptions";
 import { ProductImage } from "@/types/productImage";
 
@@ -13,7 +17,7 @@ export interface Product {
   storeId: string;
   createdAt: string;
   updatedAt: string;
-  
+
   // Nested relationships from API response
   category?: {
     id: string;
@@ -26,6 +30,7 @@ export interface Product {
   images?: ProductImage[];
   options?: ProductOption[];
   variants?: ProductVariant[];
+  _count: any;
 }
 
 export interface VariantMasterTemplate {

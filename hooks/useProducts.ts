@@ -142,3 +142,28 @@ export const useCreateProduct = () => {
     },
   });
 };
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  const currentStore = useCurrentStore();
+
+  return useMutation({
+    mutationFn: async (productId: string) => {
+      const response = await fetch(`/api/proxy/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to delete product");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["products", currentStore?.id],
+      });
+    },
+  });
+};
