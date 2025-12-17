@@ -11,6 +11,15 @@ interface CreateProductInput {
   profileId?: string;
 }
 
+interface UpdateProductInput {
+  title?: string;
+  slug?: string;
+  description?: string;
+  active?: boolean;
+  categoryId?: string;
+  profileId?: string;
+}
+
 interface ProductsResponse {
   data: Product[];
   total: number;
@@ -138,6 +147,38 @@ export const useCreateProduct = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["products", currentStore?.id],
+      });
+    },
+  });
+};
+
+export const useUpdateProduct = () => {
+  const queryClient = useQueryClient();
+  const currentStore = useCurrentStore();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateProductInput }) => {
+      const response = await fetch(`/api/proxy/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to update product");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["products", currentStore?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["product"],
       });
     },
   });

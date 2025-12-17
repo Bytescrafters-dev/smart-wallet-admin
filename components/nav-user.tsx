@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useLogin } from "@/hooks/auth/useLogin";
 import { useProfile } from "@/hooks/my-profile/useProfile";
-import { MY_PROFILE } from "@/shared/constants/pageUrls";
+import { MY_PROFILE, SETTINGS } from "@/shared/constants/pageUrls";
 import { useRouter } from "next/navigation";
 
 const getDisplayName = (
@@ -56,12 +56,8 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { logout, loading: logoutPending } = useLogin();
-  const {
-    profile,
-    profileLoading,
-    profileError,
-    refetchProfile,
-  } = useProfile();
+  const { profile, profileLoading, profileError, refetchProfile } =
+    useProfile();
 
   useEffect(() => {
     if (profileError) toast.error(profileError);
@@ -98,7 +94,11 @@ export function NavUser() {
         <SidebarMenuItem>
           <div className="flex flex-col gap-2 rounded-md border border-dashed border-muted-foreground/30 p-3 text-sm text-muted-foreground">
             <span>Failed to load profile</span>
-            <Button variant="outline" size="sm" onClick={() => refetchProfile()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetchProfile()}
+            >
               Retry
             </Button>
           </div>
@@ -170,9 +170,11 @@ export function NavUser() {
                   Account
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <IconSettings />
-                Settings
+              <DropdownMenuItem>
+                <a href={SETTINGS} className="flex items-center gap-2">
+                  <IconSettings />
+                  Settings
+                </a>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <IconNotification />

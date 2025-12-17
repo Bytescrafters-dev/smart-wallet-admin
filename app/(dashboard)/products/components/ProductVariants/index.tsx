@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion } from "@/components/ui/accordion";
-import { ChevronDown, ChevronRight, Copy, Plus, X } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import {
   useProductVariants,
@@ -15,9 +15,9 @@ import {
   useGetProductOptions,
   ProductOptionValue,
 } from "@/hooks/useProductOptions";
-import VariantAccordionItem from "../variantAccodion";
+import VariantAccordionItem from "./variantAccodion";
 import { VariantMasterTemplate } from "@/types/product";
-import VariantMasterTemplateCard from "../variantMasterTemplate";
+import VariantMasterTemplateCard from "./variantMasterTemplate";
 
 interface ProductVariantsProps {
   productId?: string;

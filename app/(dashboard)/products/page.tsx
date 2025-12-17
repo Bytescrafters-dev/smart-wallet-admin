@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -66,9 +67,9 @@ const Products = () => {
               <TableHead className="font-bold">Image</TableHead>
               <TableHead className="font-bold">Title</TableHead>
               <TableHead className="font-bold">Category</TableHead>
-              <TableHead className="font-bold">Variants</TableHead>
-              <TableHead className="font-bold">Active</TableHead>
-              <TableHead className="font-bold">Actions</TableHead>
+              <TableHead className="font-bold text-center">Variants</TableHead>
+              <TableHead className="font-bold text-center">Active</TableHead>
+              <TableHead className="font-bold text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -124,22 +125,19 @@ const Products = () => {
                   <TableCell className="text-muted-foreground">
                     {product.category?.name || "No Category"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-center">
                     {product._count?.variants || 0}
                   </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        product.active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                  <TableCell className="text-center">
+                    <Badge
+                      variant={product.active ? "default" : "secondary"}
+                      className="text-xs"
                     >
                       {product.active ? "Active" : "Inactive"}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-center">
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/products/update/${product.id}`}>
                           <Edit className="h-4 w-4" />
