@@ -9,7 +9,7 @@ export const POST = async () => {
   if (!refresh)
     return NextResponse.json({ message: "No refresh token" }, { status: 401 });
 
-  const res = await fetch(`${env.BACKEND_URL}/auth/refresh`, {
+  const res = await fetch(`${env.BACKEND_URL}/auth/admin/refresh`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ refresh }),
@@ -28,11 +28,16 @@ export const POST = async () => {
     console.log("from refresh empty access and refresh");
     return NextResponse.json(
       { message: "Invalid refresh response" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
-  await setAuthCookies(accessToken, 15 * 60, refreshToken, 60 * 60 * 24 * 30);
+  await setAuthCookies(
+    accessToken,
+    10 * 60 * 60,
+    refreshToken,
+    60 * 60 * 24 * 30,
+  );
 
   return NextResponse.json({ ok: true, accessToken });
 };

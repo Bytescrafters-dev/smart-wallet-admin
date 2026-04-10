@@ -77,7 +77,7 @@ export const useProducts = ({
       if (active !== undefined) params.append("active", active.toString());
 
       const response = await fetch(
-        `/api/proxy/products/store/${currentStore.id}?${params.toString()}`
+        `/api/proxy/products/store/${currentStore.id}?${params.toString()}`,
       );
 
       if (!response.ok) {
@@ -93,7 +93,7 @@ export const useProducts = ({
 
 export const useGetProduct = (
   productId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   return useQuery({
     queryKey: ["product", productId],
@@ -133,7 +133,7 @@ export const useCreateProduct = () => {
         body: JSON.stringify({
           ...data,
           storeId: currentStore.id,
-          profileId: "cmiq39i9f0002yiazedu83ycv",
+          profileId: "cmnmng61g000147yiack1gptk",
         }),
       });
 
@@ -157,7 +157,13 @@ export const useUpdateProduct = () => {
   const currentStore = useCurrentStore();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateProductInput }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateProductInput;
+    }) => {
       const response = await fetch(`/api/proxy/products/${id}`, {
         method: "PUT",
         headers: {
