@@ -51,7 +51,7 @@ export const useProducts = ({
   return useQuery({
     queryKey: [
       "products",
-      currentStore?.id,
+      currentStore?.slug,
       page,
       limit,
       title,
@@ -77,7 +77,7 @@ export const useProducts = ({
       if (active !== undefined) params.append("active", active.toString());
 
       const response = await fetch(
-        `/api/proxy/products/store/${currentStore.id}?${params.toString()}`,
+        `/api/proxy/products/store/${currentStore.slug}?${params.toString()}`,
       );
 
       if (!response.ok) {

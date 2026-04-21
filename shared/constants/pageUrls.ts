@@ -1,5 +1,9 @@
 export const DASHBOARD = "/";
-export const USER_ROLES_ADD = "/user-roles/add";
-export const USER_ROLES_VIEW = "/user-roles";
 export const MY_PROFILE = "/my-profile";
 export const SETTINGS = "/settings";
+export const PRODUCT_CATEGORIES = "/product-categories";
+export const PRODUCT_CATEGORIES_CREATE = "/product-categories/create";
+export const PRODUCT_CATEGORIES_UPDATE = "/product-categories/update";
+export const PRODUCTS = "/products";
+export const PRODUCTS_CREATE = "/products/create";
+export const PRODUCTS_UPDATE = "/products/update";

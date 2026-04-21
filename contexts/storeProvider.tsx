@@ -34,4 +34,3 @@ export default StoreProvider;
 
 export const useCurrentStore = () => useContext(StoreCtx).currentStore;
 export const useSetCurrentStore = () => useContext(StoreCtx).setCurrentStore;
-export { useStores } from "@/hooks/useStores";
