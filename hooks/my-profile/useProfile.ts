@@ -26,7 +26,7 @@ const fetchProfileRequest = async (): Promise<UserProfile> => {
 };
 
 const updateProfileRequest = async (
-  data: UpdateProfileInput
+  data: UpdateProfileInput,
 ): Promise<UserProfile> => {
   const response = await fetch("/api/proxy/profile/my-profile", {
     method: "PATCH",
@@ -52,7 +52,7 @@ const updateProfileRequest = async (
 };
 
 const uploadAvatarRequest = async (
-  formData: FormData
+  formData: FormData,
 ): Promise<UploadAvatarResponse> => {
   const response = await fetch("/api/proxy/admin/uploads/avatar", {
     method: "POST",
@@ -85,26 +85,30 @@ export const useProfile = () => {
     queryFn: fetchProfileRequest,
   });
 
-  const uploadProfileMutation = useMutation<UserProfile, Error, UpdateProfileInput>(
-    {
-      mutationFn: updateProfileRequest,
-      onSuccess: (updated) => {
-        queryClient.setQueryData(PROFILE_QUERY_KEY, updated);
-      },
-    }
-  );
+  const updateProfileMutation = useMutation<
+    UserProfile,
+    Error,
+    UpdateProfileInput
+  >({
+    mutationFn: updateProfileRequest,
+    onSuccess: (updated) => {
+      queryClient.setQueryData(PROFILE_QUERY_KEY, updated);
+    },
+  });
 
-  const uploadAvatarMutation = useMutation<UploadAvatarResponse, Error, FormData>(
-    {
-      mutationFn: uploadAvatarRequest,
-      onSuccess: ({ avatar }) => {
-        queryClient.setQueryData<UserProfile | undefined>(
-          PROFILE_QUERY_KEY,
-          (prev) => (prev ? { ...prev, avatar } : prev)
-        );
-      },
-    }
-  );
+  const uploadAvatarMutation = useMutation<
+    UploadAvatarResponse,
+    Error,
+    FormData
+  >({
+    mutationFn: uploadAvatarRequest,
+    onSuccess: ({ avatar }) => {
+      queryClient.setQueryData<UserProfile | undefined>(
+        PROFILE_QUERY_KEY,
+        (prev) => (prev ? { ...prev, avatar } : prev),
+      );
+    },
+  });
 
   return {
     profile: profileQuery.data ?? null,
@@ -112,9 +116,9 @@ export const useProfile = () => {
     profileRefetching: profileQuery.isRefetching,
     profileError: profileQuery.error?.message ?? null,
     refetchProfile: profileQuery.refetch,
-    uploadProfile: uploadProfileMutation.mutateAsync,
-    updatingProfile: uploadProfileMutation.isPending,
-    uploadProfileError: getErrorMessage(uploadProfileMutation.error),
+    uploadProfile: updateProfileMutation.mutateAsync,
+    updatingProfile: updateProfileMutation.isPending,
+    uploadProfileError: getErrorMessage(updateProfileMutation.error),
     uploadAvatar: uploadAvatarMutation.mutateAsync,
     uploadingAvatar: uploadAvatarMutation.isPending,
     uploadAvatarError: getErrorMessage(uploadAvatarMutation.error),

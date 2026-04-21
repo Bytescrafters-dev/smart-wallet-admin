@@ -16,7 +16,7 @@ import { toast } from "sonner";
 async function getCroppedImg(
   imageSrc: string,
   crop: any,
-  zoom: number
+  zoom: number,
 ): Promise<Blob> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -42,7 +42,7 @@ async function getCroppedImg(
     0,
     0,
     croppedWidth,
-    croppedHeight
+    croppedHeight,
   );
 
   return new Promise((resolve) => {
@@ -65,7 +65,7 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   onUploaded: () => void;
   uploadAvatar: (
-    formData: FormData
+    formData: FormData,
   ) => Promise<{ success: true; avatar: string } | undefined>;
   loadingAvatar: boolean;
   error: string | null;

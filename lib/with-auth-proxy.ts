@@ -3,7 +3,7 @@ import { env } from "./env";
 
 export async function proxyToBackend(
   req: Request,
-  backendPath: string
+  backendPath: string,
 ): Promise<Response> {
   const url = new URL(req.url);
   const target = `${env.BACKEND_URL}/${backendPath}${url.search}`;
@@ -14,7 +14,6 @@ export async function proxyToBackend(
 
   const accessToken = await getAccessTokenFromCookies();
 
-  console.log("new access", accessToken);
   if (accessToken) headers.set("authorization", `Bearer ${accessToken}`);
 
   const init: RequestInit = {
@@ -34,7 +33,7 @@ export async function proxyToBackend(
 export async function proxyToBackendWithAccess(
   req: Request,
   backendPath: string,
-  token: string
+  token: string,
 ): Promise<Response> {
   const url = new URL(req.url);
   const target = `${env.BACKEND_URL}/${backendPath}${url.search}`;
