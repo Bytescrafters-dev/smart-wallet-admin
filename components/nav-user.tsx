@@ -36,7 +36,7 @@ import { useRouter } from "next/navigation";
 const getDisplayName = (
   firstName?: string | null,
   lastName?: string | null,
-  email?: string | null
+  email?: string | null,
 ) => {
   const composed = `${firstName ?? ""} ${lastName ?? ""}`.trim();
   return composed || email || "Unknown user";
@@ -110,7 +110,7 @@ export function NavUser() {
   const displayName = getDisplayName(
     profile?.firstName,
     profile?.lastName,
-    profile?.email
+    profile?.email,
   );
   const email = profile?.email ?? "—";
   const avatarSrc = profile?.avatar || "/avatars/shadcn.jpg";
@@ -165,13 +165,13 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href={MY_PROFILE} className="flex items-center gap-2">
+                <a href={MY_PROFILE} className="flex items-center gap-2 w-full">
                   <IconUserCircle />
                   Account
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <a href={SETTINGS} className="flex items-center gap-2">
+                <a href={SETTINGS} className="flex items-center gap-2 w-full">
                   <IconSettings />
                   Settings
                 </a>

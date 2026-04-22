@@ -14,6 +14,7 @@ import { VariantMasterTemplate } from "@/types/product";
 import { Separator } from "@/components/ui/separator";
 import { ProductOption } from "@/hooks/useProductOptions";
 import { ProductVariant, VariantPrice } from "@/hooks/useProductVariants";
+import { CURRENCIES } from "@/shared/constants/common";
 
 type Props = {
   setMasterTemplate: React.Dispatch<
@@ -24,7 +25,7 @@ type Props = {
   updateTemplatePrice: (
     index: number,
     field: keyof VariantPrice,
-    value: any
+    value: any,
   ) => void;
   removePriceFromTemplate: (index: number) => void;
   generateVariantsFromOptions: () => void;
@@ -128,24 +129,25 @@ const VariantMasterTemplateCard = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="AUD">AUD</SelectItem>
+                      {CURRENCIES.map((currency) => (
+                        <SelectItem key={currency.value} value={currency.value}>
+                          {currency.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={price.amount / 100}
                     onChange={(e) =>
                       updateTemplatePrice(
                         index,
                         "amount",
-                        Math.round((parseFloat(e.target.value) || 0) * 100)
+                        Math.round((parseFloat(e.target.value) || 0) * 100),
                       )
                     }
                     placeholder="0.00"
-                    step="0.01"
                     className="flex-1"
                   />
                   {masterTemplate.prices.length > 1 && (
@@ -275,10 +277,7 @@ const VariantMasterTemplateCard = ({
         <Separator />
 
         <div className="flex gap-4">
-          <Button
-            onClick={generateVariantsFromOptions}
-            disabled={options.length === 0}
-          >
+          <Button onClick={generateVariantsFromOptions}>
             <Plus className="w-4 h-4 mr-2" />
             Generate Variants
           </Button>

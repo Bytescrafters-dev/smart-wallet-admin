@@ -146,7 +146,7 @@ export const useCreateProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["products", currentStore?.id],
+        queryKey: ["products", currentStore?.slug],
       });
     },
   });
@@ -181,7 +181,7 @@ export const useUpdateProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["products", currentStore?.id],
+        queryKey: ["products", currentStore?.slug],
       });
       queryClient.invalidateQueries({
         queryKey: ["product"],
@@ -209,7 +209,7 @@ export const useDeleteProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["products", currentStore?.id],
+        queryKey: ["products", currentStore?.slug],
       });
     },
   });

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserProfile } from "@/types/common";
+import { getErrorMessage } from "@/lib/utils";
 
 const PROFILE_QUERY_KEY = ["profile", "me"];
 
@@ -73,9 +74,6 @@ const uploadAvatarRequest = async (
 
   return { success: true, avatar: payload.avatarUrl };
 };
-
-const getErrorMessage = (err: unknown) =>
-  err ? (err instanceof Error ? err.message : "Something went wrong") : null;
 
 export const useProfile = () => {
   const queryClient = useQueryClient();

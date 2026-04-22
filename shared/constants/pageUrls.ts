@@ -1,6 +1,7 @@
 export const DASHBOARD = "/";
 export const MY_PROFILE = "/my-profile";
 export const SETTINGS = "/settings";
+export const SETTINGS_STORE = (id: string) => `/settings/stores/${id}`;
 export const PRODUCT_CATEGORIES = "/product-categories";
 export const PRODUCT_CATEGORIES_CREATE = "/product-categories/create";
 export const PRODUCT_CATEGORIES_UPDATE = "/product-categories/update";

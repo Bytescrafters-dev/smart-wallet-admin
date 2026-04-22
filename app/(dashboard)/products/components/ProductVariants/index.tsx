@@ -18,6 +18,7 @@ import {
 import VariantAccordionItem from "./variantAccodion";
 import { VariantMasterTemplate } from "@/types/product";
 import VariantMasterTemplateCard from "./variantMasterTemplate";
+import { useCurrentStore } from "@/contexts/storeProvider";
 
 interface ProductVariantsProps {
   productId?: string;
@@ -25,44 +26,16 @@ interface ProductVariantsProps {
 
 // Helper function to generate cartesian product
 const cartesianProduct = (
-  arrays: ProductOptionValue[][]
+  arrays: ProductOptionValue[][],
 ): ProductOptionValue[][] => {
   return arrays.reduce(
     (acc, curr) => acc.flatMap((x) => curr.map((y) => [...x, y])),
-    [[]] as ProductOptionValue[][]
+    [[]] as ProductOptionValue[][],
   );
 };
 
-// Simple hash function for SKU generation
-const simpleHash = (str: string): string => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash).toString(36).substring(0, 6).toUpperCase();
-};
-
-// Helper function to generate unique SKU from option values using hash
-const generateSKU = (
-  optionValues: ProductOptionValue[],
-  basePattern: string = "PROD"
-): string => {
-  // Create a unique string from option value IDs and names
-  const uniqueString = optionValues
-    .map((val) => `${val.id}-${val.value}`)
-    .sort() // Sort for consistency
-    .join("|");
-
-  // Generate hash from the unique string
-  const hash = simpleHash(uniqueString);
-
-  return `${basePattern}-${hash}`;
-};
-
 const ProductVariants = ({ productId }: ProductVariantsProps) => {
-  // State
+  const currentStore = useCurrentStore();
   const [showGenerator, setShowGenerator] = useState<boolean>(true);
   const [masterTemplate, setMasterTemplate] = useState<VariantMasterTemplate>({
     skuPattern: "PROD",
@@ -73,10 +46,7 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
     widthCm: 0,
     heightCm: 0,
     active: true,
-    prices: [
-      { currency: "AUD", amount: 0 },
-      { currency: "USD", amount: 0 },
-    ] as VariantPrice[],
+    prices: [] as VariantPrice[],
     inventory: {
       quantity: 0,
       reserved: 0,
@@ -84,12 +54,45 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
     } as VariantInventory,
   });
   const [generatedVariants, setGeneratedVariants] = useState<ProductVariant[]>(
-    []
+    [],
   );
   const [expandedVariants, setExpandedVariants] = useState<string[]>([]);
   // const [selectedVariants, setSelectedVariants] = useState<Set<string>>(
   //   new Set()
   // );
+
+  const generateSKU = (
+    optionValues: ProductOptionValue[],
+    basePattern: string = "PROD",
+  ): string => {
+    const productAnchor = productId?.slice(0, 8).toUpperCase() ?? "UNKNOWN";
+    const parts = [basePattern, productAnchor];
+    if (optionValues.length > 0) {
+      parts.push(...optionValues.map((val) => val.value.toUpperCase().replace(/\s+/g, "-")));
+    }
+    return parts.join("-");
+  };
+
+  useEffect(() => {
+    if (currentStore && currentStore.defaultCurrency) {
+      setMasterTemplate((prev) => ({
+        ...prev,
+        prices:
+          prev.prices.length > 0
+            ? prev.prices.map((price) =>
+                price.currency === currentStore.defaultCurrency
+                  ? price
+                  : { ...price, currency: currentStore.defaultCurrency },
+              )
+            : [
+                {
+                  currency: currentStore.defaultCurrency,
+                  amount: 0,
+                },
+              ],
+      }));
+    }
+  }, [currentStore]);
 
   // API hooks
   const { data: options = [], isLoading: optionsLoading } =
@@ -112,7 +115,21 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
 
   const generateVariantsFromOptions = () => {
     if (options.length === 0) {
-      toast.error("No product options found. Please create options first.");
+      const defaultVariant: ProductVariant = {
+        sku: generateSKU([], masterTemplate.skuPattern),
+        title: masterTemplate.titlePattern || "Default",
+        active: masterTemplate.active,
+        weightGrams: masterTemplate.weightGrams || undefined,
+        lengthCm: masterTemplate.lengthCm || undefined,
+        widthCm: masterTemplate.widthCm || undefined,
+        heightCm: masterTemplate.heightCm || undefined,
+        optionValueIds: [],
+        optionValueNames: [],
+        prices: masterTemplate.prices.map((price) => ({ ...price })),
+        inventory: { ...masterTemplate.inventory },
+      };
+      setGeneratedVariants([defaultVariant]);
+      toast.success("Generated 1 default variant");
       return;
     }
 
@@ -127,12 +144,12 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
             /{(\w+)}/g,
             (match, optionName) => {
               const optionIndex = options.findIndex(
-                (opt) => opt.name.toLowerCase() === optionName.toLowerCase()
+                (opt) => opt.name.toLowerCase() === optionName.toLowerCase(),
               );
               return optionIndex >= 0
                 ? combination[optionIndex]?.value || match
                 : match;
-            }
+            },
           )
         : optionValueNames.join(" ");
 
@@ -211,10 +228,10 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
 
   const handleUpdateGeneratedVariant = (
     updatedVariant: ProductVariant,
-    index: number
+    index: number,
   ) => {
     setGeneratedVariants((prev) =>
-      prev.map((v, i) => (i === index ? updatedVariant : v))
+      prev.map((v, i) => (i === index ? updatedVariant : v)),
     );
   };
 
@@ -251,7 +268,10 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
   const addPriceToTemplate = () => {
     setMasterTemplate((prev) => ({
       ...prev,
-      prices: [...prev.prices, { currency: "GBP", amount: 0 }],
+      prices: [
+        ...prev.prices,
+        { currency: currentStore?.defaultCurrency ?? "", amount: 0 },
+      ],
     }));
   };
 
@@ -265,12 +285,12 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
   const updateTemplatePrice = (
     index: number,
     field: keyof VariantPrice,
-    value: any
+    value: any,
   ) => {
     setMasterTemplate((prev) => ({
       ...prev,
       prices: prev.prices.map((price, i) =>
-        i === index ? { ...price, [field]: value } : price
+        i === index ? { ...price, [field]: value } : price,
       ),
     }));
   };
