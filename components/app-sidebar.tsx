@@ -8,6 +8,9 @@ import {
   IconListDetails,
   IconUsers,
   IconBallVolleyball,
+  IconUsersPlus,
+  IconPackages,
+  IconShoppingCart,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -51,11 +54,28 @@ const navMain = [
     ],
   },
   {
+    title: "Inventory",
+    url: "/purchase-orders",
+    icon: IconPackages,
+    collapsible: true,
+    items: [{ title: "Purchase Orders", url: "/purchase-orders" }],
+  },
+  {
     title: "Orders",
     url: "#",
-    icon: IconChartBar,
+    icon: IconShoppingCart,
     collapsible: false,
     items: [],
+  },
+  {
+    title: "Suppliers",
+    url: "/suppliers",
+    icon: IconUsersPlus,
+    collapsible: true,
+    items: [
+      { title: "View Suppliers", url: "/suppliers" },
+      { title: "Add Supplier", url: "/suppliers/create" },
+    ],
   },
 ];
 

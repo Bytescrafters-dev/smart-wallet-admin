@@ -138,7 +138,7 @@ const VariantMasterTemplateCard = ({
                   </Select>
                   <Input
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={price.amount / 100}
                     onChange={(e) =>
                       updateTemplatePrice(
@@ -170,7 +170,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Weight (g)</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.weightGrams}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -183,7 +184,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Length (cm)</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.lengthCm}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -196,7 +198,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Width (cm)</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.widthCm}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -209,7 +212,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Height (cm)</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.heightCm}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -226,7 +230,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Default Stock</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.inventory.quantity}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -242,7 +247,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Reserved Stock</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.inventory.reserved}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({
@@ -258,7 +264,8 @@ const VariantMasterTemplateCard = ({
             <div className="space-y-2">
               <Label>Low Stock Threshold</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={masterTemplate.inventory.lowStockThreshold}
                 onChange={(e) =>
                   setMasterTemplate((prev: any) => ({

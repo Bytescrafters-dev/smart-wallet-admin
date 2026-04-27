@@ -19,8 +19,6 @@ const ProductCategories = () => {
 
   const { data, isLoading, error } = useCategories({ page, limit });
 
-  console.log("categorues", data);
-
   if (error) {
     return (
       <div className="p-4 md:p-8">

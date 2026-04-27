@@ -18,17 +18,21 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, X } from "lucide-react";
+import { Store } from "@/types/store";
+import { CURRENCIES } from "@/shared/constants/common";
 
 const VariantAccordionItem = ({
   variant,
   index,
   isUnsaved,
+  store,
   onUpdate,
   onDelete,
 }: {
   variant: ProductVariant;
   index: number;
   isUnsaved: boolean;
+  store: Store | null;
   onUpdate: (variant: ProductVariant, index: number) => void;
   onDelete: (variantId: string, index: number) => void;
 }) => {
@@ -65,7 +69,10 @@ const VariantAccordionItem = ({
   const addPrice = () => {
     setEditedVariant((prev) => ({
       ...prev,
-      prices: [...prev.prices, { currency: "EUR", amount: 0 }],
+      prices: [
+        ...prev.prices,
+        { currency: store?.defaultCurrency ?? "", amount: 0 },
+      ],
     }));
     setHasChanges(true);
   };
@@ -81,12 +88,12 @@ const VariantAccordionItem = ({
   const updatePrice = (
     index: number,
     field: keyof VariantPrice,
-    value: any
+    value: any,
   ) => {
     setEditedVariant((prev) => ({
       ...prev,
       prices: prev.prices.map((price, i) =>
-        i === index ? { ...price, [field]: value } : price
+        i === index ? { ...price, [field]: value } : price,
       ),
     }));
     setHasChanges(true);
@@ -240,20 +247,22 @@ const VariantAccordionItem = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="AUD">AUD</SelectItem>
+                      {CURRENCIES.map((currency) => (
+                        <SelectItem key={currency.value} value={currency.value}>
+                          {currency.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={price.amount / 100}
                     onChange={(e) =>
                       updatePrice(
                         index,
                         "amount",
-                        Math.round((parseFloat(e.target.value) || 0) * 100)
+                        Math.round((parseFloat(e.target.value) || 0) * 100),
                       )
                     }
                     placeholder="0.00"
@@ -280,12 +289,13 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Available Stock</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.inventory.quantity}
                   onChange={(e) =>
                     updateVariant(
                       "inventory.quantity",
-                      parseInt(e.target.value) || 0
+                      parseInt(e.target.value) || 0,
                     )
                   }
                 />
@@ -293,12 +303,13 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Reserved Stock</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.inventory.reserved}
                   onChange={(e) =>
                     updateVariant(
                       "inventory.reserved",
-                      parseInt(e.target.value) || 0
+                      parseInt(e.target.value) || 0,
                     )
                   }
                 />
@@ -306,12 +317,13 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Low Stock Threshold</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.inventory.lowStockThreshold}
                   onChange={(e) =>
                     updateVariant(
                       "inventory.lowStockThreshold",
-                      parseInt(e.target.value) || 0
+                      parseInt(e.target.value) || 0,
                     )
                   }
                 />
@@ -331,7 +343,8 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Weight (g)</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.weightGrams || 0}
                   onChange={(e) =>
                     updateVariant("weightGrams", parseInt(e.target.value) || 0)
@@ -341,7 +354,8 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Length (cm)</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.lengthCm || 0}
                   onChange={(e) =>
                     updateVariant("lengthCm", parseInt(e.target.value) || 0)
@@ -351,7 +365,8 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Width (cm)</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.widthCm || 0}
                   onChange={(e) =>
                     updateVariant("widthCm", parseInt(e.target.value) || 0)
@@ -361,7 +376,8 @@ const VariantAccordionItem = ({
               <div className="space-y-2">
                 <Label>Height (cm)</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={editedVariant.heightCm || 0}
                   onChange={(e) =>
                     updateVariant("heightCm", parseInt(e.target.value) || 0)

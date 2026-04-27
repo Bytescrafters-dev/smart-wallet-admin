@@ -68,7 +68,11 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
     const productAnchor = productId?.slice(0, 8).toUpperCase() ?? "UNKNOWN";
     const parts = [basePattern, productAnchor];
     if (optionValues.length > 0) {
-      parts.push(...optionValues.map((val) => val.value.toUpperCase().replace(/\s+/g, "-")));
+      parts.push(
+        ...optionValues.map((val) =>
+          val.value.toUpperCase().replace(/\s+/g, "-"),
+        ),
+      );
     }
     return parts.join("-");
   };
@@ -363,6 +367,7 @@ const ProductVariants = ({ productId }: ProductVariantsProps) => {
               {displayVariants.map((variant, index) => (
                 <VariantAccordionItem
                   key={variant.id || `generated-${index}`}
+                  store={currentStore}
                   variant={variant}
                   index={index}
                   isUnsaved={!variant.id}
