@@ -45,3 +45,25 @@ export interface VariantMasterTemplate {
   prices: VariantPrice[];
   inventory: VariantInventory;
 }
+
+export interface productSearchVariant {
+  id: string;
+  title: string;
+  sku: string;
+  inventory: {
+    quantity: number;
+  };
+}
+
+export interface ProductsSearch {
+  id: string;
+  storeId: string;
+  title: string;
+  slug: string;
+  description: string;
+  active: boolean;
+  variants: productSearchVariant[];
+  _count: {
+    variants: number;
+  };
+}

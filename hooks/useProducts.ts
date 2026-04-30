@@ -27,6 +27,28 @@ interface ProductsResponse {
   limit: number;
 }
 
+interface productSearchVariant {
+  id: string;
+  title: string;
+  sku: string;
+  inventory: {
+    quantity: number;
+  };
+}
+
+interface ProductsSearchResponse {
+  id: string;
+  storeId: string;
+  title: string;
+  slug: string;
+  description: string;
+  active: boolean;
+  variants: productSearchVariant[];
+  _count: {
+    variants: number;
+  };
+}
+
 interface UseProductsParams {
   page?: number;
   limit?: number;
@@ -87,6 +109,35 @@ export const useProducts = ({
       return response.json();
     },
     enabled: !!currentStore?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useSeachProducts = (search: string) => {
+  const currentStore = useCurrentStore();
+
+  return useQuery({
+    queryKey: ["products-search", currentStore?.slug, search],
+    queryFn: async (): Promise<ProductsSearchResponse[]> => {
+      if (!currentStore?.id) {
+        throw new Error("No store selected");
+      }
+
+      const params = new URLSearchParams({
+        search,
+      });
+
+      const response = await fetch(
+        `/api/proxy/products/store/search-all/${currentStore.slug}?${params.toString()}`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      return response.json();
+    },
+    enabled: !!currentStore?.id && !!search,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

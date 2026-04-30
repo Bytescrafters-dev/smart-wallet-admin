@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -16,6 +17,20 @@ import DeleteDialog from "@/components/delete-confirmation-dialog";
 import { toast } from "sonner";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { IconPlus } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case "CREATED":
+      return "bg-blue-100 text-blue-800";
+    case "REJECTED":
+      return "bg-red-100 text-red-800";
+    case "RECEIVED":
+      return "bg-green-100 text-green-800";
+    case "PARTIALLY_RECEIVED":
+      return "bg-yellow-100 text-yellow-800";
+  }
+};
 
 const PurchaseOrdersPage = () => {
   const [page, setPage] = useState(1);
@@ -43,12 +58,6 @@ const PurchaseOrdersPage = () => {
       toast.success("Purchase order deleted successfully");
     } catch {}
   };
-
-  // useEffect(() => {
-  //   if (isError) {
-  //     toast.error("Failed to delete supplier!");
-  //   }
-  // }, [isError]);
 
   if (error) {
     return (
@@ -82,6 +91,7 @@ const PurchaseOrdersPage = () => {
               <TableHead className="font-bold">Order Number</TableHead>
               <TableHead className="font-bold">Created By</TableHead>
               <TableHead className="font-bold">Supplier Name</TableHead>
+              <TableHead className="font-bold">Expected Date</TableHead>
               <TableHead className="font-bold">Line Count</TableHead>
               <TableHead className="font-bold">Status</TableHead>
               <TableHead className="font-bold text-center">Actions</TableHead>
@@ -96,6 +106,9 @@ const PurchaseOrdersPage = () => {
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-16" />
@@ -123,11 +136,21 @@ const PurchaseOrdersPage = () => {
                     {`${purchaseOrder.createdBy?.firstName} ${purchaseOrder.createdBy?.lastName}`}
                   </TableCell>
                   <TableCell>{purchaseOrder.supplier.name || "-"}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {purchaseOrder._count || "-"}
+                  <TableCell>
+                    {purchaseOrder.expectedDeliveryDate
+                      ? format(
+                          new Date(purchaseOrder.expectedDeliveryDate),
+                          "yyyy-MM-dd",
+                        )
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {purchaseOrder.stutus || "-"}
+                    {purchaseOrder._count?.lines ?? "-"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <Badge className={getStatusColor(purchaseOrder.status)}>
+                      {purchaseOrder.status}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 justify-center">
