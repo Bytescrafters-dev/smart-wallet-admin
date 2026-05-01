@@ -58,7 +58,10 @@ const navMain = [
     url: "/purchase-orders",
     icon: IconPackages,
     collapsible: true,
-    items: [{ title: "Purchase Orders", url: "/purchase-orders" }],
+    items: [
+      { title: "Purchase Orders", url: "/purchase-orders" },
+      { title: "Stock Receipts", url: "/stock-receipts" },
+    ],
   },
   {
     title: "Orders",

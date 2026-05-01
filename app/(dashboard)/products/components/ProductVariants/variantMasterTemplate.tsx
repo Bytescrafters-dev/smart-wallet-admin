@@ -233,15 +233,7 @@ const VariantMasterTemplateCard = ({
                 type="text"
                 inputMode="decimal"
                 value={masterTemplate.inventory.quantity}
-                onChange={(e) =>
-                  setMasterTemplate((prev: any) => ({
-                    ...prev,
-                    inventory: {
-                      ...prev.inventory,
-                      quantity: parseInt(e.target.value) || 0,
-                    },
-                  }))
-                }
+                disabled
               />
             </div>
             <div className="space-y-2">
@@ -250,15 +242,7 @@ const VariantMasterTemplateCard = ({
                 type="text"
                 inputMode="decimal"
                 value={masterTemplate.inventory.reserved}
-                onChange={(e) =>
-                  setMasterTemplate((prev: any) => ({
-                    ...prev,
-                    inventory: {
-                      ...prev.inventory,
-                      reserved: parseInt(e.target.value) || 0,
-                    },
-                  }))
-                }
+                disabled
               />
             </div>
             <div className="space-y-2">

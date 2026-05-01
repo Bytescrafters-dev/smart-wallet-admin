@@ -292,12 +292,7 @@ const VariantAccordionItem = ({
                   type="text"
                   inputMode="decimal"
                   value={editedVariant.inventory.quantity}
-                  onChange={(e) =>
-                    updateVariant(
-                      "inventory.quantity",
-                      parseInt(e.target.value) || 0,
-                    )
-                  }
+                  disabled
                 />
               </div>
               <div className="space-y-2">
@@ -306,12 +301,7 @@ const VariantAccordionItem = ({
                   type="text"
                   inputMode="decimal"
                   value={editedVariant.inventory.reserved}
-                  onChange={(e) =>
-                    updateVariant(
-                      "inventory.reserved",
-                      parseInt(e.target.value) || 0,
-                    )
-                  }
+                  disabled
                 />
               </div>
               <div className="space-y-2">

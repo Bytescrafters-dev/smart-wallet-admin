@@ -53,7 +53,7 @@ export interface ReceivePurchaseOrderInput {
     lineId: string;
     receivedQty: number;
     costPerUnit: number;
-  };
+  }[];
 }
 
 export const usePurchaseOrders = ({
@@ -195,6 +195,58 @@ export const useReceivePurchaseOrder = (id: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["purchase-order", id],
+      });
+    },
+  });
+};
+
+export const useRejectPurchaseOrder = (id: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<{ id: string; status: string }> => {
+      const response = await fetch(`/api/proxy/stock-orders/${id}/reject`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to create purchase order");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-order", id],
+      });
+    },
+  });
+};
+
+export const useDeletePurchaseOrder = () => {
+  const queryClient = useQueryClient();
+  const currentStore = useCurrentStore();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/proxy/stock-orders/${orderId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to delete purchase order");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-orders", currentStore?.id],
       });
     },
   });

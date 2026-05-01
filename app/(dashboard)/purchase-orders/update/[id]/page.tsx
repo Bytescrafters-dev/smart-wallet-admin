@@ -19,11 +19,13 @@ import {
   useUpdatePurchaseOrder,
   usePurchaseOrder,
   useReceivePurchaseOrder,
+  useRejectPurchaseOrder,
 } from "@/hooks/usePurchaseOrders";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "../../page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PurchaseOrderStatus } from "@/types/purchaseOrder";
+import DeleteDialog from "@/components/delete-confirmation-dialog";
 
 const UpdatePurchaseOrderPage = () => {
   const router = useRouter();
@@ -40,6 +42,9 @@ const UpdatePurchaseOrderPage = () => {
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState<
     Date | undefined
   >(undefined);
+  const [rejectDialog, setRejectDialog] = useState({
+    isOpen: false,
+  });
 
   const {
     data: purchaseOrder,
@@ -53,11 +58,14 @@ const UpdatePurchaseOrderPage = () => {
     isError,
   } = useUpdatePurchaseOrder(purchaseOrderId);
 
+  const { mutateAsync: receivePurchaseOrder, isError: receiveError } =
+    useReceivePurchaseOrder(purchaseOrderId);
+
   const {
-    mutateAsync: receivePurchaseOrder,
-    isPending: receivePending,
-    isError: receiveError,
-  } = useReceivePurchaseOrder(purchaseOrderId);
+    mutateAsync: rejectPurchaseOrder,
+    isPending: rejectPending,
+    isError: rejectError,
+  } = useRejectPurchaseOrder(purchaseOrderId);
 
   const orderStatus = purchaseOrder?.status ?? PurchaseOrderStatus.UNRESOLVED;
   const editable =
@@ -117,6 +125,15 @@ const UpdatePurchaseOrderPage = () => {
     );
   };
 
+  const handleRejectConfirm = async () => {
+    try {
+      await rejectPurchaseOrder();
+      setRejectDialog({ isOpen: false });
+      toast.success("Purchase order rejected successfully");
+      router.push("/purchase-orders");
+    } catch {}
+  };
+
   const handleSubmit = async () => {
     if (lines.length === 0) {
       toast.error("Add at least one product line before updating the order.");
@@ -162,13 +179,19 @@ const UpdatePurchaseOrderPage = () => {
     if (purchaseOrderError) {
       toast.error("Failed to fetch purchase order!");
     }
-  }, [purchaseOrderError]);
 
-  useEffect(() => {
     if (isError) {
       toast.error("Failed to update purchase order!");
     }
-  }, [isError]);
+
+    if (receiveError) {
+      toast.error("Failed to receive items!");
+    }
+
+    if (rejectError) {
+      toast.error("Failed to reject purchaseOrder!");
+    }
+  }, [receiveError, rejectError, isError, purchaseOrderError]);
 
   return (
     <div className="p-4 md:p-8">
@@ -244,6 +267,12 @@ const UpdatePurchaseOrderPage = () => {
                   lines={lines}
                   onRemove={handleRemoveLine}
                   onUpdate={handleUpdateLine}
+                  onReceive={async (lineId, receivedQty, costPerUnit) => {
+                    await receivePurchaseOrder({
+                      currency,
+                      lines: [{ lineId, receivedQty, costPerUnit }],
+                    });
+                  }}
                   parentComponent={ParentComponent.UPDATE}
                   orderStatus={orderStatus}
                 />
@@ -265,6 +294,13 @@ const UpdatePurchaseOrderPage = () => {
             Cancel
           </Button>
           <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setRejectDialog({ isOpen: true })}
+          >
+            Reject Purchase Order
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={lines.length === 0 || isPending}
           >
@@ -273,6 +309,14 @@ const UpdatePurchaseOrderPage = () => {
           </Button>
         </div>
       </div>
+      <DeleteDialog
+        isOpen={rejectDialog.isOpen}
+        onOpenChange={() => setRejectDialog({ isOpen: false })}
+        isLoading={false}
+        onConfirm={handleRejectConfirm}
+        title="Delete Purchase Order"
+        description={`Are you sure you want to reject "${purchaseOrder?.orderNumber}"? This action cannot be undone.`}
+      />
     </div>
   );
 };

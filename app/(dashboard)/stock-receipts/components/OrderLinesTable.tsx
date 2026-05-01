@@ -11,8 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
-import { PurchaseOrderStatus } from "@/types/purchaseOrder";
-import { ReceiveLineDialog } from "./ReceiveLineDialog";
 
 export interface OrderLine {
   lineId?: string;
@@ -20,9 +18,8 @@ export interface OrderLine {
   productTitle: string;
   variantTitle: string;
   sku: string;
-  orderedQty: number;
+  qty: number;
   costPerUnit?: number;
-  receivedQty?: number;
 }
 
 interface Props {
@@ -30,15 +27,9 @@ interface Props {
   onRemove: (variantId: string) => void;
   onUpdate: (
     variantId: string,
-    updates: Partial<Pick<OrderLine, "orderedQty" | "costPerUnit">>,
+    updates: Partial<Pick<OrderLine, "qty" | "costPerUnit">>,
   ) => void;
-  onReceive?: (
-    lineId: string,
-    receivedQty: number,
-    costPerUnit: number,
-  ) => Promise<void>;
   parentComponent?: string;
-  orderStatus?: string;
   currency: string;
 }
 
@@ -51,37 +42,17 @@ export const OrderLinesTable = ({
   lines,
   onRemove,
   onUpdate,
-  onReceive,
   currency,
   parentComponent = ParentComponent.CREATE,
-  orderStatus = PurchaseOrderStatus.UNRESOLVED,
 }: Props) => {
-  const [receivingLine, setReceivingLine] = useState<OrderLine | null>(null);
-
-  const editable =
-    orderStatus === PurchaseOrderStatus.UNRESOLVED ||
-    orderStatus === PurchaseOrderStatus.CREATED;
-
-  const limitedlyEditable =
-    orderStatus === PurchaseOrderStatus.UNRESOLVED ||
-    orderStatus === PurchaseOrderStatus.CREATED ||
-    orderStatus === PurchaseOrderStatus.PARTIALLY_RECEIVED;
-
-  const receivable =
-    orderStatus === PurchaseOrderStatus.CREATED ||
-    orderStatus === PurchaseOrderStatus.PARTIALLY_RECEIVED;
-
   const total = lines.reduce((sum, line) => {
     if (line.costPerUnit !== undefined) {
-      return sum + line.orderedQty * line.costPerUnit;
+      return sum + line.qty * line.costPerUnit;
     }
     return sum;
   }, 0);
 
   const hasAnyCost = lines.some((l) => l.costPerUnit !== undefined);
-  const hasAnyReceived = lines.some(
-    (l) => l.receivedQty !== undefined && l.receivedQty > 0,
-  );
 
   return (
     <div className="border rounded-md overflow-hidden">
@@ -91,10 +62,7 @@ export const OrderLinesTable = ({
             <TableHead className="font-semibold">Product</TableHead>
             <TableHead className="font-semibold">Variant</TableHead>
             <TableHead className="font-semibold">SKU</TableHead>
-            <TableHead className="font-semibold w-24">Ordered Qty</TableHead>
-            {parentComponent === ParentComponent.UPDATE && (
-              <TableHead className="font-semibold w-24">Received Qty</TableHead>
-            )}
+            <TableHead className="font-semibold w-24">Quantity</TableHead>
             <TableHead className="font-semibold w-64">Cost / Unit</TableHead>
             <TableHead className="font-semibold w-28">Line Total</TableHead>
             <TableHead className="w-32" />
@@ -104,7 +72,7 @@ export const OrderLinesTable = ({
           {lines.map((line) => {
             const lineTotal =
               line.costPerUnit !== undefined
-                ? (line.orderedQty * line.costPerUnit).toFixed(2)
+                ? (line.qty * line.costPerUnit).toFixed(2)
                 : null;
 
             return (
@@ -122,21 +90,16 @@ export const OrderLinesTable = ({
                   <Input
                     type="number"
                     min={1}
-                    value={line.orderedQty}
+                    value={line.qty}
                     className="h-8 w-20"
-                    disabled={!editable}
                     onChange={(e) =>
                       onUpdate(line.variantId, {
-                        orderedQty: Math.max(1, parseInt(e.target.value) || 1),
+                        qty: Math.max(1, parseInt(e.target.value) || 1),
                       })
                     }
+                    disabled={parentComponent === ParentComponent.UPDATE}
                   />
                 </TableCell>
-                {parentComponent === ParentComponent.UPDATE && (
-                  <TableCell className="text-center">
-                    {line.receivedQty ?? "-"}
-                  </TableCell>
-                )}
                 <TableCell className="flex items-center gap-1">
                   <Input
                     type="number"
@@ -152,37 +115,22 @@ export const OrderLinesTable = ({
                           : undefined,
                       })
                     }
-                    disabled={!limitedlyEditable}
+                    disabled={parentComponent === ParentComponent.UPDATE}
                   />
                 </TableCell>
                 <TableCell className="text-right pr-4 text-muted-foreground">
                   {lineTotal !== null ? `${currency} ${lineTotal}` : "—"}
                 </TableCell>
                 <TableCell className="flex items-center gap-1">
-                  {parentComponent === ParentComponent.UPDATE &&
-                    receivable &&
-                    line.lineId &&
-                    (line.receivedQty ?? 0) < line.orderedQty && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="px-2"
-                        onClick={() => setReceivingLine(line)}
-                      >
-                        Receive
-                      </Button>
-                    )}
-
-                  {!hasAnyReceived && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => onRemove(line.variantId)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => onRemove(line.variantId)}
+                    disabled={parentComponent === ParentComponent.UPDATE}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             );
@@ -197,16 +145,6 @@ export const OrderLinesTable = ({
           </span>
         </div>
       )}
-
-      <ReceiveLineDialog
-        line={receivingLine}
-        currency={currency}
-        open={!!receivingLine}
-        onClose={() => setReceivingLine(null)}
-        onConfirm={async (lineId, receivedQty, costPerUnit) => {
-          await onReceive?.(lineId, receivedQty, costPerUnit);
-        }}
-      />
     </div>
   );
 };
