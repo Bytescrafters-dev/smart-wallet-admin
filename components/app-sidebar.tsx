@@ -11,6 +11,7 @@ import {
   IconUsersPlus,
   IconPackages,
   IconShoppingCart,
+  IconTopologyStar3,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -78,6 +79,16 @@ const navMain = [
     items: [
       { title: "View Suppliers", url: "/suppliers" },
       { title: "Add Supplier", url: "/suppliers/create" },
+    ],
+  },
+  {
+    title: "Leads",
+    url: "/leads",
+    icon: IconTopologyStar3,
+    collapsible: true,
+    items: [
+      { title: "View Leads", url: "/leads" },
+      { title: "Import Leads", url: "/leads/import" },
     ],
   },
 ];

@@ -126,7 +126,9 @@ const Products = () => {
                     {product.category?.name || "No Category"}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-center">
-                    {product._count?.variants || 0}
+                    <Link href={`/products/variants/${product.id}`}>
+                      {product._count?.variants || 0}
+                    </Link>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge
