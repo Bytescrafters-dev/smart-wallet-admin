@@ -4,6 +4,31 @@ import {
   proxyToBackendWithAccess,
 } from "@/lib/with-auth-proxy";
 
+type RefreshResult =
+  | { ok: false }
+  | { ok: true; newAccess: string; setCookies: string[] };
+
+let pendingRefresh: Promise<RefreshResult> | null = null;
+
+function getRefresh(req: NextRequest): Promise<RefreshResult> {
+  if (!pendingRefresh) {
+    pendingRefresh = (async (): Promise<RefreshResult> => {
+      const r = await fetch(new URL("/api/auth/refresh", req.url), {
+        method: "POST",
+        headers: { cookie: req.headers.get("cookie") || "" },
+      });
+      if (!r.ok) return { ok: false };
+      const data = await r.json();
+      const newAccess = data?.access || data?.accessToken;
+      const setCookies = r.headers.getSetCookie?.() ?? [];
+      return { ok: true, newAccess, setCookies };
+    })().finally(() => {
+      pendingRefresh = null;
+    });
+  }
+  return pendingRefresh;
+}
+
 async function attempt(req: NextRequest, path: string) {
   const res = await proxyToBackend(req, path);
   return res;
@@ -55,23 +80,15 @@ async function handle(req: NextRequest, pathArr: string[]) {
   let res = await attempt(req, path);
   if (res.status !== 401) return res;
 
-  const refresh = await fetch(new URL("/api/auth/refresh", req.url), {
-    method: "POST",
-    headers: {
-      cookie: req.headers.get("cookie") || "",
-    },
-  });
+  const result = await getRefresh(req);
 
-  if (!refresh.ok) {
+  if (!result.ok) {
     const url = new URL("/login", req.url);
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
 
-  const refreshData = await refresh.json();
-  const newAccess = refreshData?.access || refreshData?.accessToken;
-
-  res = await proxyToBackendWithAccess(req, path, newAccess);
+  res = await proxyToBackendWithAccess(req, path, result.newAccess);
 
   if (res.status === 401) {
     const url = new URL("/login", req.url);
@@ -79,5 +96,13 @@ async function handle(req: NextRequest, pathArr: string[]) {
     return NextResponse.redirect(url);
   }
 
-  return res;
+  const headers = new Headers(res.headers);
+  for (const cookie of result.setCookies) {
+    headers.append("set-cookie", cookie);
+  }
+  return new NextResponse(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  });
 }

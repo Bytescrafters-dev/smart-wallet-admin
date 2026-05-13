@@ -41,7 +41,7 @@ export const getCampaignStyles = (campaign: LEAD_CAMPAIGN) => {
   }
 };
 
-export const getStatusStyles = (status: LEAD_STATUS) => {
+export const getStatusStyles = (status: string) => {
   switch (status) {
     case LEAD_STATUS.NEW:
       return "bg-blue-100 text-blue-800";

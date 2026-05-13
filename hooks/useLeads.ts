@@ -52,6 +52,7 @@ interface UpdateLeadInput {
   note?: string;
   followUpDate?: string;
   assignedToId?: string;
+  status: string;
 }
 
 export interface BulkCreateResponse {
@@ -124,7 +125,7 @@ export const useLeads = ({
   });
 };
 
-const useLead = (leadId: string) => {
+export const useLead = (leadId: string) => {
   return useQuery({
     queryKey: ["lead", leadId],
     queryFn: async () => {
@@ -141,7 +142,7 @@ const useLead = (leadId: string) => {
   });
 };
 
-const useCreateLead = () => {
+export const useCreateLead = () => {
   const queryClient = useQueryClient();
   const currentStore = useCurrentStore();
 

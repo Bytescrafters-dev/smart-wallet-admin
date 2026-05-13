@@ -39,5 +39,5 @@ export const POST = async () => {
     60 * 60 * 24 * 30,
   );
 
-  return NextResponse.json({ ok: true, accessToken });
+  return NextResponse.json({ ok: true, access: accessToken });
 };
