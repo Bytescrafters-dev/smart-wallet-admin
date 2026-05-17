@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserProfile } from "@/types/common";
+import { UserProfile } from "@/types/profile";
 import { getErrorMessage } from "@/lib/utils";
 
 const PROFILE_QUERY_KEY = ["profile", "me"];
@@ -7,6 +7,8 @@ const PROFILE_QUERY_KEY = ["profile", "me"];
 type UpdateProfileInput = Pick<UserProfile, "firstName" | "lastName" | "phone">;
 
 type UploadAvatarResponse = { success: true; avatar: string };
+
+type ChangePasswordInput = { currentPassword: string; newPassword: string };
 
 const fetchProfileRequest = async (): Promise<UserProfile> => {
   const response = await fetch("/api/proxy/profile/my-profile");
@@ -52,6 +54,23 @@ const updateProfileRequest = async (
   return user;
 };
 
+const changePasswordRequest = async (
+  data: ChangePasswordInput,
+): Promise<void> => {
+  const response = await fetch("/api/auth/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const msg =
+      (await response.json().catch(() => ({}))).message ??
+      "Failed to change password!";
+    throw new Error(msg);
+  }
+};
+
 const uploadAvatarRequest = async (
   formData: FormData,
 ): Promise<UploadAvatarResponse> => {
@@ -94,6 +113,10 @@ export const useProfile = () => {
     },
   });
 
+  const changePasswordMutation = useMutation<void, Error, ChangePasswordInput>({
+    mutationFn: changePasswordRequest,
+  });
+
   const uploadAvatarMutation = useMutation<
     UploadAvatarResponse,
     Error,
@@ -120,5 +143,8 @@ export const useProfile = () => {
     uploadAvatar: uploadAvatarMutation.mutateAsync,
     uploadingAvatar: uploadAvatarMutation.isPending,
     uploadAvatarError: getErrorMessage(uploadAvatarMutation.error),
+    changePassword: changePasswordMutation.mutateAsync,
+    changingPassword: changePasswordMutation.isPending,
+    changePasswordError: getErrorMessage(changePasswordMutation.error),
   };
 };

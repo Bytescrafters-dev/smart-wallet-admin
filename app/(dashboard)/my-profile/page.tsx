@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserStatus } from "@/types/common";
+import { AdminRole } from "@/types/profile";
 import { Loader2Icon, Pencil } from "lucide-react";
 import { useProfile } from "@/hooks/my-profile/useProfile";
 import { z } from "zod";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AvatarUploader } from "./components/avatar-uploader";
+import { ChangePasswordDialog } from "./components/change-password-dialog";
 
 const initials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0).toUpperCase()}${lastName
@@ -26,16 +27,19 @@ const fullName = (firstName: string, lastName: string) => {
   return `${firstName} ${lastName}`.trim();
 };
 
-const getStatus = (status: UserStatus | null) => {
-  console.log(status);
-  switch (status) {
-    case UserStatus.ACTIVE:
+const getAdminRole = (role: AdminRole | null) => {
+  switch (role) {
+    case AdminRole.OWNER:
       return (
-        <span className="text-muted-foreground truncate text-sm">Active</span>
+        <span className="text-muted-foreground truncate text-sm">Owner</span>
       );
-    case UserStatus.INACTIVE:
+    case AdminRole.MANAGER:
       return (
-        <span className="text-muted-foreground truncate text-sm">Inactive</span>
+        <span className="text-muted-foreground truncate text-sm">Manager</span>
+      );
+    case AdminRole.VIEWER:
+      return (
+        <span className="text-muted-foreground truncate text-sm">Staff</span>
       );
     default:
       return (
@@ -55,6 +59,7 @@ type Form = z.infer<typeof schema>;
 
 const MyProfile = () => {
   const [openAvatarDialog, setOpenAvatarDialog] = useState<boolean>(false);
+  const [openPasswordDialog, setOpenPasswordDialog] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(false);
   const {
     profile,
@@ -67,6 +72,8 @@ const MyProfile = () => {
     uploadAvatar,
     uploadingAvatar,
     uploadAvatarError,
+    changePassword,
+    changingPassword,
   } = useProfile();
   const { register, handleSubmit, reset } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -131,14 +138,14 @@ const MyProfile = () => {
                     alt={
                       fullName(
                         profile?.firstName ?? "",
-                        profile?.lastName ?? ""
+                        profile?.lastName ?? "",
                       ) || profile?.email
                     }
                   />
                   <AvatarFallback className="text-lg">
                     {initials(
                       profile?.firstName ?? "",
-                      profile?.lastName ?? ""
+                      profile?.lastName ?? "",
                     )}
                   </AvatarFallback>
                 </Avatar>
@@ -162,13 +169,13 @@ const MyProfile = () => {
                 <CardTitle>
                   {fullName(
                     profile?.firstName ?? "",
-                    profile?.lastName ?? ""
+                    profile?.lastName ?? "",
                   ) || "Unnamed User"}
                 </CardTitle>
                 <span className="text-muted-foreground truncate text-sm">
                   {profile?.email}
                 </span>
-                {getStatus(profile?.status ?? null)}
+                {getAdminRole(profile?.role ?? null)}
               </div>
             </>
           )}
@@ -291,21 +298,28 @@ const MyProfile = () => {
                   <span className="text-xs uppercase text-muted-foreground">
                     Role
                   </span>
-                  <span className="text-sm">{profile?.role || "—"}</span>
-                </div>
-                <div className="grid gap-1">
-                  <span className="text-xs uppercase text-muted-foreground">
-                    Status
+                  <span className="text-sm">
+                    {getAdminRole(profile?.role ?? null)}
                   </span>
-                  <span className="text-sm">{profile?.status || "—"}</span>
                 </div>
               </div>
 
               {/* Future: “Edit profile” + “Change password” actions */}
               <div className="flex gap-2">
                 <Button onClick={() => setEdit(true)}>Edit Profile</Button>
-                <Button variant="outline">Change Password</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setOpenPasswordDialog(true)}
+                >
+                  Change Password
+                </Button>
               </div>
+              <ChangePasswordDialog
+                open={openPasswordDialog}
+                onOpenChange={setOpenPasswordDialog}
+                changePassword={changePassword}
+                changingPassword={changingPassword}
+              />
             </>
           )}
         </CardContent>

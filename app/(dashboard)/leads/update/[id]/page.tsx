@@ -24,17 +24,17 @@ import { ProductSearch } from "../../components/productSearch";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/common/DatePicker";
 import { format } from "date-fns";
-import { LEAD_STATUS } from "@/types/leads";
+import { LEAD_CAMPAIGN, LEAD_STATUS } from "@/types/leads";
 import { getStatusStyles } from "../../page";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const CAMPAIGN_OPTIONS = [
-  { label: "Facebook", value: "FACEBOOK" },
-  { label: "Instagram", value: "INSTAGRAM" },
-  { label: "Google", value: "GOOGLE" },
-  { label: "TikTok", value: "TIKTOK" },
-  { label: "WhatsApp", value: "WHATSAPP" },
-  { label: "Other", value: "OTHER" },
+  { label: "Facebook", value: LEAD_CAMPAIGN.FACEBOOK },
+  { label: "Instagram", value: LEAD_CAMPAIGN.INSTAGRAM },
+  { label: "Google", value: LEAD_CAMPAIGN.GOOGLE },
+  { label: "TikTok", value: LEAD_CAMPAIGN.TIKTOK },
+  { label: "WhatsApp", value: LEAD_CAMPAIGN.WHATSAPP },
+  { label: "Other", value: LEAD_CAMPAIGN.OTHER },
 ];
 
 const LEAD_STATUS_OPTIONS = [
@@ -54,7 +54,6 @@ const schema = z.object({
   address2: z.string(),
   state: z.string(),
   postalCode: z.string(),
-  source: z.string(),
   note: z.string(),
   followUpDate: z.string(),
   city: z.string(),
@@ -73,24 +72,25 @@ const UpdateLeadPage = () => {
     undefined,
   );
   const [status, setStatus] = useState<LEAD_STATUS>(LEAD_STATUS.NEW);
+  const [source, setSource] = useState<LEAD_CAMPAIGN>(LEAD_CAMPAIGN.OTHER);
 
-  const { register, handleSubmit, reset, watch, setValue } = useForm<Form>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      fullName: "",
-      phone: "",
-      email: "",
-      address1: "",
-      address2: "",
-      city: "",
-      state: "",
-      country: "",
-      postalCode: "",
-      source: CAMPAIGN_OPTIONS[0].value,
-      note: "",
-      followUpDate: "",
-    },
-  });
+  const { register, handleSubmit, reset, watch, setValue, getValues } =
+    useForm<Form>({
+      resolver: zodResolver(schema),
+      defaultValues: {
+        fullName: "",
+        phone: "",
+        email: "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+        note: "",
+        followUpDate: "",
+      },
+    });
 
   const { data, isLoading, isError: loadingLeadError } = useLead(leadId);
 
@@ -108,11 +108,11 @@ const UpdateLeadPage = () => {
         state: data.state ?? "",
         country: data.country ?? "",
         postalCode: data.postalCode ?? "",
-        source: data.source,
         note: data.note ?? "",
         followUpDate: data.followUpDate ?? "",
       });
       setStatus(data.status || LEAD_STATUS.NEW);
+      setSource(data.source || LEAD_CAMPAIGN.OTHER);
       setProductSKUs(data.productSKUs ?? []);
       setAssignedToId(data.assignedToId ?? undefined);
     }
@@ -129,7 +129,6 @@ const UpdateLeadPage = () => {
       state,
       country,
       postalCode,
-      source,
       note,
       followUpDate,
     } = values;
@@ -165,7 +164,6 @@ const UpdateLeadPage = () => {
         state: "",
         country: "",
         postalCode: "",
-        source: "",
         note: "",
         followUpDate: "",
       });
@@ -185,6 +183,9 @@ const UpdateLeadPage = () => {
   const onAddProduct = (sku: string) => {
     if (!productSKUs.includes(sku)) setProductSKUs([...productSKUs, sku]);
   };
+
+  console.log("status", status);
+  console.log("campaign", source);
 
   return (
     <div className="p-4 md:p-8">
@@ -342,10 +343,10 @@ const UpdateLeadPage = () => {
                     Campaign Source
                   </Label>
                   <Select
-                    value={watch("source")}
-                    onValueChange={(v) =>
-                      setValue("source", v as Form["source"])
-                    }
+                    value={source}
+                    onValueChange={(v) => {
+                      if (v) setSource(v as LEAD_CAMPAIGN);
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />

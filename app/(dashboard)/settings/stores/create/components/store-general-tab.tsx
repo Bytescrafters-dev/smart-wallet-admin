@@ -21,6 +21,7 @@ import { CURRENCIES, TIMEZONES } from "@/shared/constants/common";
 
 const storeSchema = z.object({
   name: z.string().min(1, "Store name is required"),
+  slug: z.string().min(1, "Slug is required"),
   domain: z.string(),
   defaultCurrency: z.string().min(1, "Default currency is required"),
   timezone: z.string(),
@@ -29,15 +30,13 @@ const storeSchema = z.object({
 type StoreForm = z.infer<typeof storeSchema>;
 
 export function StoreGeneralTab({
-  store,
   onSave,
-  isUpdating,
+  isCreating,
 }: {
-  store: Store;
   onSave: (updated: Partial<Store>) => void;
-  isUpdating?: boolean;
+  isCreating?: boolean;
 }) {
-  const [uploadState, setForm] = useState<Store>(store);
+  //const [uploadState, setForm] = useState<Store>(store);
   const {
     register,
     handleSubmit,
@@ -46,40 +45,40 @@ export function StoreGeneralTab({
     formState: { errors },
   } = useForm<StoreForm>({
     resolver: zodResolver(storeSchema),
+    defaultValues: {
+      name: "",
+      slug: "",
+      domain: "",
+      defaultCurrency: CURRENCIES[0].value,
+      supportEmail: "",
+    },
   });
 
-  const [logoPreview, setLogoPreview] = useState<string | null>(store.logoUrl);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-  const set = (field: keyof Store, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  //   const set = (field: keyof Store, value: string) =>
+  //     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     setLogoPreview(url);
-    set("logoUrl", url);
+    //set("logoUrl", url);
   };
 
-  useEffect(() => {
-    if (store) {
-      setValue("name", store.name);
-      setValue("domain", store.domain ?? "");
-      setValue("defaultCurrency", store.defaultCurrency);
-      setValue("timezone", store.timezone ?? "");
-      setValue("supportEmail", store.supportEmail ?? "");
-    }
-  }, [store]);
+  const generateSlug = (value: string) => {
+    const slug = value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    setValue("slug", slug);
+  };
 
   const onSubmit = (values: StoreForm) => {
-    const updatedtore = {
-      name: values.name,
-      domain: values.domain ?? null,
-      defaultCurrency: values.defaultCurrency,
-      timezone: values.timezone ?? null,
-      supportEmail: values.supportEmail ?? null,
-    };
-    onSave(updatedtore);
+    const { name, slug, domain, defaultCurrency, supportEmail } = values;
+
+    onSave({ name, slug, domain, defaultCurrency, supportEmail, logoUrl: "" });
   };
 
   return (
@@ -113,16 +112,18 @@ export function StoreGeneralTab({
       {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register("name")} required />
+        <Input
+          id="name"
+          {...register("name")}
+          onChange={(e) => generateSlug(e.target.value)}
+          required
+        />
       </div>
 
       {/* Slug (read-only) */}
       <div className="space-y-2">
         <Label htmlFor="slug">Slug</Label>
-        <Input id="slug" value={store.slug} disabled className="bg-muted" />
-        <p className="text-xs text-muted-foreground">
-          Slug cannot be changed after creation.
-        </p>
+        <Input id="slug" {...register("slug")} required />
       </div>
 
       {/* Domain */}
@@ -190,14 +191,14 @@ export function StoreGeneralTab({
         </Select>
       </div>
 
-      <Button type="submit" disabled={isUpdating}>
-        {isUpdating ? (
+      <Button type="submit" disabled={isCreating}>
+        {isCreating ? (
           <>
             <Loader2Icon className="animate-spin" />
             Please wait
           </>
         ) : (
-          "Save Changes"
+          "Create Store"
         )}
       </Button>
     </form>

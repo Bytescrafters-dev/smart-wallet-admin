@@ -15,6 +15,12 @@ export enum UserRole {
   USER = "USER",
 }
 
+export enum AdminRole {
+  OWNER = "OWNER",
+  MANAGER = "MANAGER",
+  VIEWER = "VIEWER",
+}
+
 export type UserProfile = {
   id: string;
   firstName: string;
@@ -23,5 +29,5 @@ export type UserProfile = {
   email: string;
   phone: string;
   avatar: string;
-  role: UserRole;
+  role: AdminRole;
 };

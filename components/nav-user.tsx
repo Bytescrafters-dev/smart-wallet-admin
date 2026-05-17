@@ -32,6 +32,7 @@ import { useLogin } from "@/hooks/auth/useLogin";
 import { useProfile } from "@/hooks/my-profile/useProfile";
 import { MY_PROFILE, SETTINGS } from "@/shared/constants/pageUrls";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const getDisplayName = (
   firstName?: string | null,
@@ -165,16 +166,22 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href={MY_PROFILE} className="flex items-center gap-2 w-full">
+                <Link
+                  href={MY_PROFILE}
+                  className="flex items-center gap-2 w-full"
+                >
                   <IconUserCircle />
                   Account
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <a href={SETTINGS} className="flex items-center gap-2 w-full">
+                <Link
+                  href={SETTINGS}
+                  className="flex items-center gap-2 w-full"
+                >
                   <IconSettings />
                   Settings
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <IconNotification />

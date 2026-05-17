@@ -2,6 +2,7 @@
 
 import { type Icon } from "@tabler/icons-react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -55,9 +56,9 @@ export function NavMain({
                         {item.items?.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
-                              <a href={subItem.url}>
+                              <Link href={subItem.url}>
                                 <span>{subItem.title}</span>
-                              </a>
+                              </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -69,11 +70,11 @@ export function NavMain({
             }
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton size={"lg"} tooltip={item.title}>
-                  {item.icon && <item.icon className="!size-5" />}
-                  <a href={item.url}>
+                <SidebarMenuButton size={"lg"} tooltip={item.title} asChild>
+                  <Link href={item.url}>
+                    {item.icon && <item.icon className="!size-5" />}
                     <span className="text-base">{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
