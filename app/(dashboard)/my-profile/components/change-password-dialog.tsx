@@ -37,7 +37,7 @@ type Props = {
   changePassword: (data: {
     currentPassword: string;
     newPassword: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   changingPassword: boolean;
 };
 
@@ -89,12 +89,19 @@ export function ChangePasswordDialog({
             >
               Current Password
             </Label>
-            <PasswordInput
-              id="currentPassword"
-              placeholder="Enter current password"
-              error={errors.currentPassword?.message}
-              {...register("currentPassword")}
-            />
+            <div className="flex-1">
+              <PasswordInput
+                id="currentPassword"
+                placeholder="Enter current password"
+                error={errors.currentPassword?.message}
+                {...register("currentPassword")}
+              />
+              {errors.currentPassword && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.currentPassword.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-1">
@@ -104,12 +111,19 @@ export function ChangePasswordDialog({
             >
               New Password
             </Label>
-            <PasswordInput
-              id="newPassword"
-              placeholder="Enter new password"
-              error={errors.newPassword?.message}
-              {...register("newPassword")}
-            />
+            <div className="flex-1">
+              <PasswordInput
+                id="newPassword"
+                placeholder="Enter new password"
+                error={errors.newPassword?.message}
+                {...register("newPassword")}
+              />
+              {errors.newPassword && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.newPassword.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-1">
@@ -119,12 +133,19 @@ export function ChangePasswordDialog({
             >
               Confirm New Password
             </Label>
-            <PasswordInput
-              id="confirmPassword"
-              placeholder="Confirm new password"
-              error={errors.confirmPassword?.message}
-              {...register("confirmPassword")}
-            />
+            <div className="flex-1">
+              <PasswordInput
+                id="confirmPassword"
+                placeholder="Confirm new password"
+                error={errors.confirmPassword?.message}
+                {...register("confirmPassword")}
+              />
+              {errors.newPassword && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.newPassword.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <DialogFooter className="mt-2">

@@ -92,16 +92,6 @@ const navMain = [
       { title: "Import Leads", url: "/leads/import" },
     ],
   },
-  {
-    title: "Staff",
-    url: "/staff",
-    icon: IconUsers,
-    collapsible: true,
-    items: [
-      { title: "View Staff", url: "/staff" },
-      { title: "Add Staff", url: "/staff/create" },
-    ],
-  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

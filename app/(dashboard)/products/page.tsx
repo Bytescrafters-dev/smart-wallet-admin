@@ -60,6 +60,10 @@ const Products = () => {
         <h1 className="text-2xl font-bold">Products</h1>
       </div>
 
+      <p className="my-4 text-sm text-muted-foreground">
+        Click on the variant count to view individual variant details.
+      </p>
+
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -125,7 +129,7 @@ const Products = () => {
                   <TableCell className="text-muted-foreground">
                     {product.category?.name || "No Category"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-center">
+                  <TableCell className="text-green-800 text-center font-bold">
                     <Link href={`/products/variants/${product.id}`}>
                       {product._count?.variants || 0}
                     </Link>

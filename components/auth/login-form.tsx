@@ -11,6 +11,7 @@ import { useLogin } from "@/hooks/auth/useLogin";
 import { Loader2Icon } from "lucide-react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import PasswordInput from "../common/PasswordInput";
 
 const schema = z.object({
   email: z.email(),
@@ -27,8 +28,13 @@ export const LoginForm = ({ nextPath = "/" }: { nextPath?: string }) => {
   const { login, error, loading } = useLogin();
 
   const onSubmit = async (values: Form) => {
-    const success = await login(values);
-    if (success) {
+    const response = await login(values);
+    if (response?.success) {
+      if (response?.mustChangePassword) {
+        router.push(`/forceChangePassword?next=${nextPath}`);
+        router.refresh();
+        return;
+      }
       router.push(nextPath);
       router.refresh();
     }
@@ -63,7 +69,7 @@ export const LoginForm = ({ nextPath = "/" }: { nextPath?: string }) => {
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" {...register("password")} />
+          <PasswordInput id="password" {...register("password")} />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? (

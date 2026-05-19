@@ -25,6 +25,10 @@ export const POST = async (req: Request) => {
     const data = await res.json();
     const access = data?.access;
     const refresh = data?.refresh;
+    const mustChangePassword = data?.mustChangePassword;
+
+    console.log(data);
+
     if (!(access && refresh)) {
       return NextResponse.json(
         { message: "Invalid login response" },
@@ -34,7 +38,7 @@ export const POST = async (req: Request) => {
 
     await setAuthCookies(access, 10 * 60 * 60, refresh, 60 * 60 * 24 * 30);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, mustChangePassword });
   } catch {
     return NextResponse.json({ message: "Login error" }, { status: 500 });
   }

@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 
 const JWT_COOKIE = env.JWT_COOKIE_NAME;
-const PROTECTED = ["/", "/products", "/admins", "my-profile"];
+const PROTECTED = ["/", "/products", "/admins", "/my-profile"];
 
 export const middleware = (req: NextRequest) => {
   const path = req.nextUrl.pathname;
 
   const needsAuth = PROTECTED.some(
-    (p) => path === p || path.startsWith(`${p}/`)
+    (p) => path === p || path.startsWith(`${p}/`),
   );
 
   if (!needsAuth) return NextResponse.next();

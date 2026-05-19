@@ -1,8 +1,10 @@
 import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 type LoginInput = { email: string; password: string };
 
 export const useLogin = () => {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +26,10 @@ export const useLogin = () => {
         throw new Error(msg);
       }
 
-      return true;
+      const data: { ok: boolean; mustChangePassword: boolean } =
+        await response.json();
+
+      return { success: data.ok, mustChangePassword: data.mustChangePassword };
     } catch (err: any) {
       setError(err?.message ?? "Failed to login!");
     } finally {
@@ -49,13 +54,14 @@ export const useLogin = () => {
         throw new Error(msg);
       }
 
+      queryClient.clear();
       return true;
     } catch (err: any) {
       setError(err?.message ?? "Failed to logout!");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   return { login, logout, loading, error };
 };

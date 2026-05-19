@@ -56,7 +56,7 @@ const updateProfileRequest = async (
 
 const changePasswordRequest = async (
   data: ChangePasswordInput,
-): Promise<void> => {
+): Promise<boolean> => {
   const response = await fetch("/api/auth/change-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -69,6 +69,7 @@ const changePasswordRequest = async (
       "Failed to change password!";
     throw new Error(msg);
   }
+  return true;
 };
 
 const uploadAvatarRequest = async (
@@ -113,8 +114,17 @@ export const useProfile = () => {
     },
   });
 
-  const changePasswordMutation = useMutation<void, Error, ChangePasswordInput>({
+  const changePasswordMutation = useMutation<
+    boolean,
+    Error,
+    ChangePasswordInput
+  >({
     mutationFn: changePasswordRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: PROFILE_QUERY_KEY,
+      });
+    },
   });
 
   const uploadAvatarMutation = useMutation<
