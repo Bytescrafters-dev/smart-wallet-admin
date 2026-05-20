@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCurrentStore } from "@/contexts/storeProvider";
+import { usePermissions } from "@/hooks/auth/usePermissions";
 
 export const ROLE_OPTIONS = [
   { label: "Manager", value: AdminRole.MANAGER },
@@ -59,6 +60,7 @@ type Form = z.infer<typeof schema>;
 const CreateStaffMember = () => {
   const router = useRouter();
   const currentStore = useCurrentStore();
+  const { isOwner, isManager } = usePermissions();
 
   const [storeIds, setStoreIds] = useState<string[]>([]);
 
@@ -150,6 +152,13 @@ const CreateStaffMember = () => {
     if (isError) toast.error("Failed to load stores!");
   }, [isError, storesError]);
 
+  const getRoleOptions = () => {
+    if (isOwner) return ROLE_OPTIONS;
+    if (isManager)
+      return ROLE_OPTIONS.filter(({ value }) => value === AdminRole.VIEWER);
+    return [];
+  };
+
   return (
     <div className="p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
@@ -239,7 +248,7 @@ const CreateStaffMember = () => {
             </div>
             <div className="flex gap-4">
               <Label className="w-40 min-w-40 text-sm font-medium leading-none flex items-center">
-                Campaign Source
+                Role
               </Label>
               <Select
                 value={watch("role")}
@@ -251,7 +260,7 @@ const CreateStaffMember = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLE_OPTIONS.map((option) => (
+                  {getRoleOptions().map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>

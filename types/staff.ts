@@ -1,4 +1,4 @@
-import { AdminRole } from "./profile";
+import { AdminRole, UserStatus } from "./profile";
 
 interface AdminStore {
   role: string;
@@ -22,4 +22,5 @@ export interface StaffMember {
   mustChangePassword: boolean;
   createdById: string | null;
   adminStores: AdminStore[];
+  status: UserStatus;
 }

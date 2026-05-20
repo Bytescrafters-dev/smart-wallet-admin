@@ -11,15 +11,19 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft } from "lucide-react";
+import { usePermissions } from "@/hooks/auth/usePermissions";
 
 const Settings = () => {
   const currentStore = useCurrentStore();
   const setCurrentStore = useSetCurrentStore();
   const { data, isLoading, isError } = useStores();
+  const { canCreateStores, canEditStores } = usePermissions();
 
   useEffect(() => {
     if (isError) toast.error("Failed to fetch stores!");
   }, [isError]);
+
+  console.log("permissoin", canCreateStores);
 
   return (
     <div className="p-4 md:p-8">
@@ -32,9 +36,11 @@ const Settings = () => {
         </Button>
         <div className="flex items-end justify-between">
           <h1 className="text-2xl font-semibold">Stores</h1>
-          <Button asChild>
-            <Link href="/settings/stores/create">Create Store</Link>
-          </Button>
+          {canCreateStores && (
+            <Button asChild>
+              <Link href="/settings/stores/create">Create Store</Link>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -67,9 +73,11 @@ const Settings = () => {
                           Set as Current
                         </Button>
                       )}
-                      <Button size="sm" asChild>
-                        <Link href={SETTINGS_STORE(store.id)}>Manage</Link>
-                      </Button>
+                      {canEditStores && (
+                        <Button size="sm" asChild>
+                          <Link href={SETTINGS_STORE(store.id)}>Manage</Link>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

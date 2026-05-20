@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,11 +15,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { ChevronDown, ChevronLeft, Edit, Trash2 } from "lucide-react";
 import { IconPlus } from "@tabler/icons-react";
-import { useStaffMembers } from "@/hooks/useStaff";
+import { useDeactivateStaffMember, useStaffMembers } from "@/hooks/useStaff";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { StaffFilters } from "./components/staffFilters";
 import { StaffMember } from "@/types/staff";
 import { cn } from "@/lib/utils";
+import { usePermissions } from "@/hooks/auth/usePermissions";
+import { AdminRole, UserStatus } from "@/types/profile";
+import { toast } from "sonner";
+import DeleteDialog from "@/components/delete-confirmation-dialog";
 
 const LIMIT = 10;
 
@@ -70,7 +74,15 @@ const StaffPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { canEditManagers, canEditStaff, isStaff } = usePermissions();
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState({
+    isOpen: false,
+    staffId: "",
+    firstName: "",
+    lastName: "",
+  });
 
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
   const q = searchParams.get("q") ?? undefined;
@@ -81,6 +93,12 @@ const StaffPageContent = () => {
     q,
   });
 
+  const {
+    mutateAsync: deactivateStaff,
+    isPending,
+    isError: deactivateError,
+  } = useDeactivateStaffMember();
+
   const setPage = (next: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", next.toString());
@@ -89,6 +107,45 @@ const StaffPageContent = () => {
 
   const toggleExpand = (id: string) =>
     setExpandedId((prev) => (prev === id ? null : id));
+
+  const canEdit = (role: AdminRole) => {
+    switch (role) {
+      case AdminRole.OWNER:
+        return false;
+      case AdminRole.MANAGER:
+        return canEditManagers;
+      case AdminRole.VIEWER:
+        return canEditStaff;
+      default:
+        return false;
+    }
+  };
+
+  const handleDeleteClick = (
+    staffId: string,
+    firstName: string,
+    lastName: string,
+  ) => {
+    setDeleteDialog({ isOpen: true, staffId, firstName, lastName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deactivateStaff(deleteDialog.staffId);
+      setDeleteDialog({
+        isOpen: false,
+        staffId: "",
+        firstName: "",
+        lastName: "",
+      });
+      toast.success("Staff member deactivated successfully");
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (deactivateError)
+      toast.error(deactivateError || "Failed to deactivate staff member");
+  }, [deactivateError]);
 
   if (isError) {
     return (
@@ -108,16 +165,19 @@ const StaffPageContent = () => {
               <TableHead className="font-bold">Last Name</TableHead>
               <TableHead className="font-bold">Email</TableHead>
               <TableHead className="font-bold">Contact Number</TableHead>
+              <TableHead className="font-bold">Role</TableHead>
               <TableHead className="font-bold">Status</TableHead>
               <TableHead className="font-bold">Stores</TableHead>
-              <TableHead className="font-bold text-center">Actions</TableHead>
+              {!isStaff && (
+                <TableHead className="font-bold text-center">Actions</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: LIMIT }).map((_, i) => (
                 <TableRow key={i}>
-                  {Array.from({ length: 7 }).map((__, j) => (
+                  {Array.from({ length: isStaff ? 7 : 8 }).map((__, j) => (
                     <TableCell key={j}>
                       <Skeleton className="h-4 w-16" />
                     </TableCell>
@@ -144,11 +204,16 @@ const StaffPageContent = () => {
                       <TableCell className="text-muted-foreground">
                         {staff.phone || "-"}
                       </TableCell>
+                      <TableCell className="text-muted-foreground font-semibold">
+                        {getRoleName(staff.role)}
+                      </TableCell>
                       <TableCell>
                         <Badge
-                          className={`${staff.mustChangePassword ? "bg-yellow-500" : "bg-green-500"}`}
+                          className={`${staff.status === UserStatus.INACTIVE ? "bg-yellow-500" : "bg-green-500"}`}
                         >
-                          {staff.mustChangePassword ? "Pending" : "Active"}
+                          {staff.status === UserStatus.ACTIVE
+                            ? "Active"
+                            : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -170,16 +235,36 @@ const StaffPageContent = () => {
                           />
                         </Button>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2 justify-center">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => {}}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {!isStaff && (
+                        <TableCell>
+                          <div className="flex gap-2 justify-center">
+                            {canEdit(staff.role) && (
+                              <>
+                                <Button variant="ghost" size="sm" asChild>
+                                  <Link
+                                    href={`/settings/staff/update/${staff.id}`}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Link>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleDeleteClick(
+                                      staff.id,
+                                      staff.firstName ?? "",
+                                      staff.lastName ?? "",
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
 
                     {isExpanded && (
@@ -240,11 +325,28 @@ const StaffPageContent = () => {
           </div>
         </div>
       )}
+      <DeleteDialog
+        isOpen={deleteDialog.isOpen}
+        onOpenChange={() =>
+          setDeleteDialog({
+            isOpen: false,
+            staffId: "",
+            firstName: "",
+            lastName: "",
+          })
+        }
+        isLoading={isPending}
+        onConfirm={handleDeleteConfirm}
+        title="Deactivate staff member"
+        description={`Are you sure you want to deactivate "${deleteDialog.firstName} ${deleteDialog.lastName}"?`}
+      />
     </>
   );
 };
 
 export default function StaffPage() {
+  const { canCreateStaff } = usePermissions();
+
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6">
@@ -256,12 +358,14 @@ export default function StaffPage() {
         </Button>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Staff Members</h1>
-          <Button asChild size="sm">
-            <Link href="/settings/staff/create">
-              <IconPlus className="mr-2" />
-              Create Staff
-            </Link>
-          </Button>
+          {canCreateStaff && (
+            <Button asChild size="sm">
+              <Link href="/settings/staff/create">
+                <IconPlus className="mr-2" />
+                Create Staff
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 

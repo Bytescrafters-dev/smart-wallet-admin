@@ -68,6 +68,64 @@ const createStaffMember = async (
   return response.json();
 };
 
+const updateStaffMember = async (
+  id: string,
+  data: Partial<StaffCreateInput>,
+): Promise<StaffMember> => {
+  const response = await fetch(`/api/proxy/users/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update staff member");
+  }
+  return response.json();
+};
+
+const assignStoreToStaff = async (
+  id: string,
+  storeIds: string[],
+): Promise<StaffMember> => {
+  const response = await fetch(`/api/proxy/users/${id}/stores`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ storeIds }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update staff member");
+  }
+  return response.json();
+};
+
+const unassignStoreFromStaff = async (id: string, storeId: string) => {
+  const response = await fetch(`/api/proxy/users/${id}/stores/${storeId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update staff member");
+  }
+  return response.json();
+};
+
+const deactivateStaffMember = async (id: string) => {
+  const response = await fetch(`/api/proxy/users/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to deactivate staff member");
+  }
+
+  return response.json();
+};
+
 export const useStaffMembers = ({
   page = 1,
   limit = 10,
@@ -94,6 +152,61 @@ export const useCreateStaffMember = () => {
 
   return useMutation({
     mutationFn: (data: StaffCreateInput) => createStaffMember(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-members"] });
+    },
+  });
+};
+
+export const useUpdateStaffMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<StaffCreateInput>;
+    }) => updateStaffMember(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-members"] });
+      queryClient.invalidateQueries({ queryKey: ["staff-member"] });
+    },
+  });
+};
+
+export const useAssignStoreToStaff = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, storeId }: { id: string; storeId: string }) =>
+      assignStoreToStaff(id, [storeId]),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-members"] });
+      queryClient.invalidateQueries({ queryKey: ["staff-member"] });
+    },
+  });
+};
+
+export const useUnassignStoreFromStaff = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, storeId }: { id: string; storeId: string }) =>
+      unassignStoreFromStaff(id, storeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-members"] });
+      queryClient.invalidateQueries({ queryKey: ["staff-member"] });
+    },
+  });
+};
+
+export const useDeactivateStaffMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deactivateStaffMember(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-members"] });
     },
