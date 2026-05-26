@@ -67,10 +67,13 @@ const navMain = [
   },
   {
     title: "Orders",
-    url: "#",
+    url: "/orders",
     icon: IconShoppingCart,
-    collapsible: false,
-    items: [],
+    collapsible: true,
+    items: [
+      { title: "View Orders", url: "/orders" },
+      { title: "New Order", url: "/orders/create" },
+    ],
   },
   {
     title: "Suppliers",

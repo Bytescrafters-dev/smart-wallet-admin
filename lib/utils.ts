@@ -128,3 +128,7 @@ export function downloadTemplate() {
   XLSX.utils.book_append_sheet(wb, refWs, "Campaign Values");
   XLSX.writeFile(wb, "leads_import_template.xlsx");
 }
+
+export const getDisplayPrice = (price: number): number => {
+  return price / 100;
+};

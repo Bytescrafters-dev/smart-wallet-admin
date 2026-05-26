@@ -53,6 +53,10 @@ export interface productSearchVariant {
   inventory: {
     quantity: number;
   };
+  prices?: {
+    currency: string;
+    amount: number; // in cents
+  }[];
 }
 
 export interface ProductsSearch {
